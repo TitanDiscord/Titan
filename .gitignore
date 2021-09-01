@@ -1,3 +1,10 @@
+#Project Configuration Files
+.gradle
+.idea
+build
+database.db
+config.json
+
 # Compiled class file
 *.class
 
