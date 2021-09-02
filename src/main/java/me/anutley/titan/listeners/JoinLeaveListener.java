@@ -2,6 +2,8 @@ package me.anutley.titan.listeners;
 
 import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.database.util.GuildSettingsDBUtil;
+import me.anutley.titan.database.util.WelcomeUtil;
+import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,6 +20,7 @@ import java.sql.SQLException;
 public class JoinLeaveListener extends ListenerAdapter {
 
     String userid;
+
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 
@@ -33,6 +36,12 @@ public class JoinLeaveListener extends ListenerAdapter {
 
             preparedStatement.setString(1, event.getGuild().getId());
             ResultSet result = preparedStatement.executeQuery();
+
+            if (WelcomeUtil.getWelcomeRole(event.getGuild()) != null) {
+                if (WelcomeUtil.getWelcomeRole(event.getGuild()).getPosition() >= RoleUtil.highestRole(event.getMember()).getPosition())
+                    return;
+                event.getGuild().addRoleToMember(event.getMember().getId(), WelcomeUtil.getWelcomeRole(event.getGuild())).queue();
+            }
 
             if (!result.getBoolean("enabled")) {
                 return;
