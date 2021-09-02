@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 
 public class RoleUtil {
@@ -32,10 +31,7 @@ public class RoleUtil {
     }
 
     public static Role highestRole(Member member) {
-        List<Role> roles = member.getRoles();
-
-        if (roles.size() == 0) return member.getGuild().getPublicRole();
-        return roles.get(roles.size() - 1);
+        return member.getRoles().size() != 0 ? member.getRoles().get(0) : member.getGuild().getPublicRole();
 
     }
 
