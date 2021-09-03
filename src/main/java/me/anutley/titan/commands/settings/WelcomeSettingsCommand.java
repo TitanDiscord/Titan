@@ -131,11 +131,7 @@ public class WelcomeSettingsCommand {
             return;
         }
 
-
-        System.out.println("Role:" + event.getOption("role").getAsRole().getPosition());
-        System.out.println("Member: " +  RoleUtil.highestRole(event.getGuild().getSelfMember()).getPosition());
-
-        if (event.getOption("role").getAsRole().getPosition() >= RoleUtil.highestRole(event.getGuild().getSelfMember()).getPosition()) {
+        if (!event.getGuild().getSelfMember().canInteract(event.getOption("role").getAsRole())) {
             event.replyEmbeds(HierarchyError.Embed(event).build()).queue();
             return;
         }

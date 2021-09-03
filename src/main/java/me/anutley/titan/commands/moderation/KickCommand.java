@@ -47,11 +47,8 @@ public class KickCommand extends Command {
             return;
         }
 
-        if (RoleUtil.highestRole(event.getOption("user").getAsMember()).getPosition() <= RoleUtil.highestRole(event.getMember()).getPosition() ) {
-            event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("I do not have the permission to kick this user")
-                    .setColor(EmbedColour.NO.getColour())
-                    .build()).queue();
+        if (!event.getGuild().getSelfMember().canInteract(event.getOption("user").getAsMember())) {
+            event.replyEmbeds(HierarchyError.Embed(event).build()).queue();
             return;
         }
 
@@ -60,7 +57,7 @@ public class KickCommand extends Command {
 
             EmbedBuilder builder = new EmbedBuilder()
                     .setColor(EmbedColour.YES.getColour())
-                    .setDescription(member.getAsMention() + " has been kicked for `" + event.getOption("reason").getAsString() + "`!");
+                    .setDescription(member.getAsMention() + " has been kicked for `" + "[" + event.getUser().getAsTag() + "] " + event.getOption("reason").getAsString() + "`!");
 
             event.replyEmbeds(builder.build()).queue();
 

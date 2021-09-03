@@ -8,7 +8,6 @@ import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -34,7 +33,6 @@ public class BanCommand extends Command {
         if (messagesToDelete > 7) messagesToDelete = 7;
 
 
-
         if (!RoleUtil.isStaff(event.getMember())) {
             event.replyEmbeds(PermissionUtil.needRoleEmbed(event, RoleUtil.getModRole(event.getGuild())).build()).setEphemeral(true).queue();
             return;
@@ -57,14 +55,11 @@ public class BanCommand extends Command {
 
 
         try {
-            if (RoleUtil.highestRole(user.getAsMember()).getPosition() <= RoleUtil.highestRole(event.getMember()).getPosition() ) {
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("I do not have the permission to ban this user")
-                        .setColor(EmbedColour.NO.getColour())
-                        .build()).queue();
+            if (!event.getGuild().getSelfMember().canInteract(event.getOption("user").getAsMember())) {
+                event.replyEmbeds(HierarchyError.Embed(event).build()).queue();
                 return;
             }
-            event.getGuild().ban(user.getAsUser(), messagesToDelete, event.getOption("reason").getAsString()).queue();
+            event.getGuild().ban(user.getAsUser(), messagesToDelete, "[" + event.getUser().getAsTag() + "] " + event.getOption("reason").getAsString()).queue();
 
             EmbedBuilder builder = new EmbedBuilder()
                     .setColor(EmbedColour.YES.getColour());
@@ -82,10 +77,10 @@ public class BanCommand extends Command {
         }
     }
 
-    public EmbedBuilder noPermissionEmbed (Role role) {
+    public EmbedBuilder noPermissionEmbed(Role role) {
         return new EmbedBuilder()
                 .setColor(EmbedColour.NO.getColour())
-                .setDescription("You do not have permission to ban someone with the " +role.getAsMention() + " role!");
+                .setDescription("You do not have permission to ban someone with the " + role.getAsMention() + " role!");
 
     }
 
