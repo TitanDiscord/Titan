@@ -67,26 +67,28 @@ public class TagCommand extends Command {
                 }
             }
 
-            if (event.getSubcommandName().equals("create") || event.getSubcommandName().equals("edit")) {
-                if (event.getOption("title").getAsString().length() > 256) {
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setTitle("The title was too long! The maxmimum amount of characters is 256.")
-                            .setColor(EmbedColour.NO.getColour())
-                            .build()).setEphemeral(true).queue();
-                    return;
-                }
-            } else if (event.getOption("content") != null) {
+            if (event.getOption("title") != null) {
                 if (event.getSubcommandName().equals("create") || event.getSubcommandName().equals("edit")) {
-                    if (event.getOption("content").getAsString().length() > 4096) {
+                    if (event.getOption("title").getAsString().length() > 256) {
                         event.replyEmbeds(new EmbedBuilder()
-                                .setTitle("The content was too long! The maxmimum amount of characters is 256.")
+                                .setTitle("The title was too long! The maxmimum amount of characters is 256.")
                                 .setColor(EmbedColour.NO.getColour())
                                 .build()).setEphemeral(true).queue();
                         return;
                     }
                 }
+                if (event.getOption("content") != null) {
+                    if (event.getSubcommandName().equals("create") || event.getSubcommandName().equals("edit")) {
+                        if (event.getOption("content").getAsString().length() > 4096) {
+                            event.replyEmbeds(new EmbedBuilder()
+                                    .setTitle("The content was too long! The maxmimum amount of characters is 256.")
+                                    .setColor(EmbedColour.NO.getColour())
+                                    .build()).setEphemeral(true).queue();
+                            return;
+                        }
+                    }
+                }
             }
-
 
             if (event.getSubcommandName().equals("create")) createTag(event);
             if (event.getSubcommandName().equals("edit")) editTag(event);
@@ -334,10 +336,6 @@ public class TagCommand extends Command {
                 preparedStatement.setString(3, trigger);
 
                 preparedStatement.executeUpdate();
-
-                event.replyEmbeds(tagEditedEmbed().build()).queue();
-                event.getChannel().sendMessageEmbeds(getTagEmbed(event).build()).queue();
-
             }
         }
 
@@ -352,10 +350,6 @@ public class TagCommand extends Command {
                 preparedStatement.setString(3, trigger);
 
                 preparedStatement.executeUpdate();
-
-                event.replyEmbeds(tagEditedEmbed().build()).queue();
-                event.getChannel().sendMessageEmbeds(getTagEmbed(event).build()).queue();
-
             }
         }
         if (event.getOption("colour") != null) {
@@ -370,10 +364,6 @@ public class TagCommand extends Command {
                 preparedStatement.setString(2, event.getGuild().getId());
                 preparedStatement.setString(3, trigger);
                 preparedStatement.executeUpdate();
-
-                event.replyEmbeds(tagEditedEmbed().build()).queue();
-                event.getChannel().sendMessageEmbeds(getTagEmbed(event).build()).queue();
-
             }
 
         }
@@ -387,10 +377,6 @@ public class TagCommand extends Command {
                 preparedStatement.setString(2, event.getGuild().getId());
                 preparedStatement.setString(3, trigger);
                 preparedStatement.executeUpdate();
-
-                event.replyEmbeds(tagEditedEmbed().build()).queue();
-                event.getChannel().sendMessageEmbeds(getTagEmbed(event).build()).queue();
-
             }
         }
         if (event.getOption("title") == null
@@ -401,6 +387,10 @@ public class TagCommand extends Command {
                     .setTitle("You did not specify anything to edit!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
+        }
+        else {
+            event.replyEmbeds(tagEditedEmbed().build()).queue();
+            event.getChannel().sendMessageEmbeds(getTagEmbed(event).build()).queue();
         }
     }
 
