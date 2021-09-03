@@ -9,6 +9,7 @@ public class MentionListener extends ListenerAdapter {
 
     public void onGuildMessageReceived (GuildMessageReceivedEvent event) {
         if (event.getMessage().getMentionedMembers().size() == 1) {
+            if (event.getMessage().getContentRaw().split(" ").length > 1) return;
             if (event.getMessage().getMentionedMembers().get(0).getUser().getId()
                     .equals(event.getJDA().getSelfUser().getId())) {
                 event.getChannel().sendMessageEmbeds(
@@ -18,6 +19,7 @@ public class MentionListener extends ListenerAdapter {
                                 .setDescription("All Titan's Command are Slash Commands" +
                                         "\n[GitHub Page](https://github.com/ANutley/Titan/)" +
                                         "\n[Documentation](https://titan.anutley.me/)")
+                                .setFooter("If you are trying to trigger a tag, the format is @Titan <tag trigger>")
                                 .build()).queue();
             }
         }

@@ -77,7 +77,8 @@ public class Titan {
                         new JoinLeaveListener(),
                         new LockdownListener(),
                         new ReadyListener(),
-                        new MentionListener()
+                        new MentionListener(),
+                        new TagListener()
 
                 ).build();
 
