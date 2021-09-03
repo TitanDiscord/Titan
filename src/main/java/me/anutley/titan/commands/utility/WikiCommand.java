@@ -17,7 +17,7 @@ public class WikiCommand extends Command {
         event.replyEmbeds(new EmbedBuilder()
                 .setTitle("Wiki")
                 .setColor(EmbedColour.NEUTRAL.getColour())
-                .setDescription("enter wiki link here")
+                .setDescription("https://titan.anutley.me/")
                 .build()).queue();
     }
 
