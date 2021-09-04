@@ -1,6 +1,8 @@
 package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.util.PermissionUtil;
+import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;

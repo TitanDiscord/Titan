@@ -1,6 +1,8 @@
 package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.util.PermissionUtil;
+import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.NotTextChannelEmbed;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -25,6 +27,11 @@ public class AnnounceCommand extends Command {
     public void onSlashCommand(SlashCommandEvent event) {
 
         if (!event.getName().equals("announce")) return;
+
+        if (!RoleUtil.isAdmin(event.getMember())) {
+            event.replyEmbeds(PermissionUtil.needAdminEmbed(event).build()).setEphemeral(true).queue();
+            return;
+        }
 
         if (!event.getOption("channel").getChannelType().equals(ChannelType.TEXT)) {
             event.replyEmbeds(NotTextChannelEmbed.Embed().build()).queue();
