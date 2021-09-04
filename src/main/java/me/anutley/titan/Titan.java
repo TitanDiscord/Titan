@@ -61,6 +61,7 @@ public class Titan {
 
                         //Utility Commands
                         registerCommand(new AnnounceCommand()),
+                        registerCommand(new GitHubCommand()),
                         registerCommand(new GuildInfoCommand()),
                         registerCommand(new HelpCommand()),
                         registerCommand(new PingCommand()),
@@ -109,6 +110,7 @@ public class Titan {
 
                         // Utility Commands
                         AnnounceCommand.AnnounceCommandData,
+                        GitHubCommand.GitHubCommandData,
                         GuildInfoCommand.GuildInfoCommandData,
                         HelpCommand.HelpCommandData,
                         PingCommand.PingCommandData,

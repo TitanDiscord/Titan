@@ -1,3 +1,4 @@
 {
-  "DISCORD_TOKEN": "enter token"
+  "DISCORD_TOKEN": "enter token",
+  "GITHUB_TOKEN": "enter token"
 }
