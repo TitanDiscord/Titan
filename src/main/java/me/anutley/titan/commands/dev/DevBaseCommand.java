@@ -25,7 +25,7 @@ public class DevBaseCommand extends Command {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription("Only <@804067028334936114> can run these commands :)")
                     .setColor(EmbedColour.NO.getColour())
-                    .build()).queue();
+                    .build()).setEphemeral(true).queue();
             return;
         }
 
