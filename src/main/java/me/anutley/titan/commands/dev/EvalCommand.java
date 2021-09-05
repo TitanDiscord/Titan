@@ -24,7 +24,6 @@ public class EvalCommand  {
         EmbedBuilder builder = new EmbedBuilder();
         try {
             long time = System.currentTimeMillis();
-            scriptEngine.eval(code);
             String output = scriptEngine.eval(code).toString();
             time = System.currentTimeMillis() - time;
             builder.setAuthor(event.getUser().getName(), null, event.getUser().getAvatarUrl());
