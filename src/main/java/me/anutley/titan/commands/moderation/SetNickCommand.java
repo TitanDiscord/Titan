@@ -23,6 +23,7 @@ public class SetNickCommand extends Command {
         try {
             if (!RoleUtil.isStaff(event.getMember())) {
                 event.replyEmbeds(PermissionUtil.needRoleEmbed(event, RoleUtil.getModRole(event.getGuild())).build()).setEphemeral(true).queue();
+                return;
             }
 
             event.getOption("user").getAsMember().modifyNickname(
