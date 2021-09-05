@@ -38,15 +38,14 @@ public class PingProtectionSettingsCommand {
         if (event.getSubcommandName().equals("enable")) togglePingProtection(event, true);
         if (event.getSubcommandName().equals("disable")) togglePingProtection(event, false);
         if (event.getSubcommandName().equals("threshold")) modifyPingThreshold(event);
-        if (event.getSubcommandName().equals("add")) addRoleToPingProtection(event, true);
-        if (event.getSubcommandName().equals("remove")) addRoleToPingProtection(event, false);
+        if (event.getSubcommandName().equals("add")) toggleRolePingProtection(event, true);
+        if (event.getSubcommandName().equals("remove")) toggleRolePingProtection(event, false);
         if (event.getSubcommandName().equals("resetpings")) resetIllegalPings(event);
         if (event.getSubcommandName().equals("action")) changeActionWhenPingsSurpassThreshold(event);
         if (event.getSubcommandName().equals("list")) listPingProtectedRoles(event);
     }
 
     public void togglePingProtection(SlashCommandEvent event, boolean bool) {
-        event.deferReply();
         try (final Connection connection = SQLiteDataSource
                 .getConnection();
              PreparedStatement preparedStatement = connection
@@ -89,7 +88,7 @@ public class PingProtectionSettingsCommand {
         }
     }
 
-    public void addRoleToPingProtection(SlashCommandEvent event, boolean bool) {
+    public void toggleRolePingProtection(SlashCommandEvent event, boolean bool) {
 
         try (final Connection connection = SQLiteDataSource
                 .getConnection();
@@ -99,11 +98,11 @@ public class PingProtectionSettingsCommand {
 
             ResultSet getPingProtectedRolesResult = preparedStatement.executeQuery();
 
-            ArrayList<String> pingProtectedRoles = new ArrayList<String>();
+            ArrayList<String> pingProtectedRoles = new ArrayList<>();
 
             if (getPingProtectedRolesResult.getString("roles") != null) {
 
-                ArrayList<String> pingProtectedRolesAsArrayList = new ArrayList<String>(Arrays.asList(getPingProtectedRolesResult.getString("roles")
+                ArrayList<String> pingProtectedRolesAsArrayList = new ArrayList<>(Arrays.asList(getPingProtectedRolesResult.getString("roles")
                         .replaceAll("\\[", "")
                         .replaceAll("]", "")
                         .split(",")));
@@ -156,7 +155,7 @@ public class PingProtectionSettingsCommand {
                     pingProtectedRoles.add(event.getOption("role").getAsRole().getId());
 
                     event.replyEmbeds(new EmbedBuilder()
-                            .setTitle(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
+                            .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
                             .setColor(EmbedColour.YES.getColour())
                             .build()).queue();
 
@@ -210,13 +209,13 @@ public class PingProtectionSettingsCommand {
             builder.setTitle("Ping Protected Roles")
                     .setColor(EmbedColour.NEUTRAL.getColour());
 
-            String content = "";
+            StringBuilder content = new StringBuilder();
 
             for (String string : pingProtectedRoles) {
-                content += event.getGuild().getRoleById(string).getAsMention();
+                content.append(event.getGuild().getRoleById(string).getAsMention());
             }
 
-            builder.setDescription(content);
+            builder.setDescription(content.toString());
 
             event.replyEmbeds(builder.build()).queue();
 
