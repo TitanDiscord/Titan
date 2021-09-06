@@ -5,6 +5,7 @@ import me.anutley.titan.database.util.IllegalPingCountUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -104,10 +105,12 @@ public class IllegalPingListener extends ListenerAdapter {
 
                         switch (action) {
                             case ("kick"):
+                                if (!event.getGuild().getSelfMember().hasPermission(Permission.KICK_MEMBERS)) break;
                                 IllegalPingCountUtil.kickUserForIllegalPing(event);
                                 break;
 
                             case ("ban"):
+                                if (!event.getGuild().getSelfMember().hasPermission(Permission.BAN_MEMBERS)) break;
                                 IllegalPingCountUtil.banUserForIllegalPing(event);
                                 break;
 

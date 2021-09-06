@@ -4,11 +4,14 @@ import me.anutley.titan.commands.Command;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
+import me.anutley.titan.util.embeds.errors.InsufficientPermissionError;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -74,6 +77,8 @@ public class BanCommand extends Command {
 
         } catch (HierarchyException exception) {
             event.replyEmbeds(HierarchyError.Embed(event).build()).queue();
+        } catch (InsufficientPermissionException exception) {
+            event.replyEmbeds(InsufficientPermissionError.Embed(event, Permission.BAN_MEMBERS).build()).setEphemeral(true).queue();
         }
     }
 

@@ -3,10 +3,13 @@ package me.anutley.titan.commands.moderation;
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
+import me.anutley.titan.util.embeds.errors.InsufficientPermissionError;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
@@ -54,17 +57,21 @@ public class SlowmodeCommand extends Command {
                     .setColor(EmbedColour.YES.getColour());
 
             if (hours != 0) formattedTime = hours + "h ";
-            if (minutes != 0)  formattedTime += minutes + "m ";
+            if (minutes != 0) formattedTime += minutes + "m ";
             if (seconds != 0) formattedTime += seconds + "s";
 
+            try {
+                if (channel == null) event.getTextChannel().getManager().setSlowmode((int) total).queue();
+                else event.getGuild().getTextChannelById(channel.getId()).getManager().setSlowmode((int) total).queue();
 
-            if (channel == null) event.getTextChannel().getManager().setSlowmode((int) total).queue();
-            else event.getGuild().getTextChannelById(channel.getId()).getManager().setSlowmode((int) total).queue();
 
+                if (total == 0) event.replyEmbeds(builder.setTitle("Slowmode has been disabled!").build()).queue();
+                else
+                    event.replyEmbeds(builder.setTitle("The slowmode has been set to one message every `" + formattedTime.trim() + "`").build()).queue();
 
-            if (total == 0) event.replyEmbeds(builder.setTitle("Slowmode has been disabled!").build()).queue();
-            else event.replyEmbeds(builder.setTitle("The slowmode has been set to one message every `" + formattedTime.trim() + "`").build()).queue();
-
+            } catch (InsufficientPermissionException exception) {
+                event.replyEmbeds(InsufficientPermissionError.Embed(event, Permission.MANAGE_CHANNEL).build()).setEphemeral(true).queue();
+            }
         }
 
     }
