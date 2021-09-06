@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public class MentionListener extends ListenerAdapter {
 
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+        if (event.getMember().getUser().isBot()) return;
         if (event.getMessage().getMentionedMembers().size() == 1) {
             if (event.getMessage().getContentRaw().split(" ").length > 1) return;
             if (event.getMessage().getMentionedMembers().get(0).getUser().getId()

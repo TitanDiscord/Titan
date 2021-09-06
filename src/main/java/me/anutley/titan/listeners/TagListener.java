@@ -15,6 +15,7 @@ public class TagListener extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+        if (event.getMember().getUser().isBot()) return;
         if (event.getMessage().getMentionedMembers().size() == 1) {
             if (event.getMessage().getContentRaw().split(" ").length < 2) return;
             if (event.getMessage().getMentionedMembers().get(0).getUser().getId()
