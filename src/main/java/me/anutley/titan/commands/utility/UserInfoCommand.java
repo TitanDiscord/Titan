@@ -26,6 +26,9 @@ public class UserInfoCommand extends Command {
 
 
         String memberTag = !member.isOwner() ? member.getUser().getAsTag() : member.getUser().getAsTag() + " 👑";
+        boolean boosting;
+
+        boosting = member.getTimeBoosted() != null;
 
         event.replyEmbeds(new EmbedBuilder()
                 .setAuthor(memberTag, null, member.getUser().getAvatarUrl())
@@ -33,13 +36,12 @@ public class UserInfoCommand extends Command {
                 .setThumbnail(member.getUser().getAvatarUrl())
                 .setColor(member.getColor())
                 .addField("ID", member.getId(), true)
-                .addField("Nickname", event.getMember().getEffectiveName(), true)
-                .addField("Account Created", TimeFormat.RELATIVE.format(event.getUser().getTimeCreated()), true)
-                .addField("Joined This Guild", TimeFormat.RELATIVE.format(event.getMember().getTimeJoined()), true)
+                .addField("Nickname", member.getEffectiveName(), true)
+                .addField("Account Created", TimeFormat.RELATIVE.format(member.getUser().getTimeCreated()), true)
+                .addField("Joined This Guild", TimeFormat.RELATIVE.format(member.getTimeJoined()), true)
                 .addField("Highest Role", RoleUtil.highestRole(member).getAsMention(), true)
-                .addField("Is Boosting", String.valueOf(event.getGuild().getBoosters().stream().anyMatch(m -> m.getId().equals(event.getMember().getId()))).replace("f", "F").replace("t", "T"), true)
+                .addField("Is Boosting", String.valueOf(boosting).replace("f", "F").replace("t", "T"), true)
                 .build()).queue();
-
 
     }
 
