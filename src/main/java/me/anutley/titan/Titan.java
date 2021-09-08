@@ -33,9 +33,8 @@ public class Titan {
 
 
         JDA jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
-                .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES)
+                .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
                 .disableCache(CacheFlag.VOICE_STATE)
-                .disableCache(CacheFlag.EMOTE)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
 
                 // Commands

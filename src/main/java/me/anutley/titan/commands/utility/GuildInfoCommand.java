@@ -24,6 +24,7 @@ public class GuildInfoCommand extends Command {
                 .setColor(EmbedColour.NEUTRAL.getColour())
                 .addField("Members", String.valueOf(event.getGuild().getMembers().size()), true)
                 .addField("Roles", String.valueOf(event.getGuild().getRoles().size()), true)
+                .addField("Emotes", String.valueOf(event.getGuild().getEmotes().size()), true)
                 .addField("Verification Level", event.getGuild().getVerificationLevel().toString(),true)
                 .addField("Created", TimeFormat.RELATIVE.format(event.getGuild().getTimeCreated()), true)
                 .addField("Categories", String.valueOf(event.getGuild().getCategories().size()), true)
