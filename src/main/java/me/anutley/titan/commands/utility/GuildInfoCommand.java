@@ -19,7 +19,7 @@ public class GuildInfoCommand extends Command {
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setAuthor("Owner: " + event.getGuild().getOwner().getUser().getName(), null, event.getGuild().getOwner().getUser().getAvatarUrl())
-                .setTitle("Guild Info")
+                .setTitle(event.getGuild().getName())
                 .setThumbnail(event.getGuild().getIconUrl())
                 .setColor(EmbedColour.NEUTRAL.getColour())
                 .addField("Members", String.valueOf(event.getGuild().getMembers().size()), true)
