@@ -25,8 +25,6 @@ public class GuildDatabaseInitialiser extends ListenerAdapter {
         }
     }
 
-
-
     public void initialiseGuildSettings(Guild guild) {
 
         try (final Connection connection = SQLiteDataSource
