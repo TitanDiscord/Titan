@@ -55,7 +55,8 @@ public class SQLiteDataSource {
         createWarnsTable();
     }
 
-    private SQLiteDataSource() { }
+    private SQLiteDataSource() {
+    }
 
     public static Connection getConnection() throws SQLException {
         return ds.getConnection();
@@ -87,10 +88,11 @@ public class SQLiteDataSource {
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "guild_id VARCHAR(20) NOT NULL," +
                     "trigger VARCHAR (100) NOT NULL," +
-                    "title VARCHAR(256) NOT NULL," +
+                    "title VARCHAR(256)," +
                     "content VARCHAR(4096)," +
                     "colour VARCHAR (6)," +
-                    "thumbnail VARCHAR(500)" +
+                    "thumbnail VARCHAR(500)," +
+                    "embed_tag BOOLEAN" +
                     ");");
 
             LOGGER.info("Tags table initialised");
