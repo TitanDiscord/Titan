@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
@@ -25,7 +26,7 @@ public class SetNickCommand extends Command {
 
         try {
             if (!RoleUtil.isStaff(event.getMember())) {
-                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, RoleUtil.getModRole(event.getGuild())).build()).setEphemeral(true).queue();
+                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getModRole()).build()).setEphemeral(true).queue();
                 return;
             }
 

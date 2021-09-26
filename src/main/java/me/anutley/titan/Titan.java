@@ -23,13 +23,13 @@ import java.util.ArrayList;
 public class Titan {
 
     public static ArrayList<Command> commands = new ArrayList<>();
+    public static JDA jda;
 
     public static void main(String[] arguments) throws LoginException, InterruptedException, IOException {
 
         Config config = new Config();
 
-
-        JDA jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
+        jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
                 .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
                 .disableCache(CacheFlag.VOICE_STATE)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
@@ -130,6 +130,9 @@ public class Titan {
         return commands;
     }
 
+    public static JDA getJda() {
+        return jda;
+    }
 
 }
 

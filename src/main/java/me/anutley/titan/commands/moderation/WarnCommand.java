@@ -2,6 +2,7 @@ package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.SQLiteDataSource;
+import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -38,7 +39,7 @@ public class WarnCommand extends Command {
 
         if (!RoleUtil.isStaff(event.getMember())) {
             if (!event.getSubcommandName().equals("list")) {
-                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, RoleUtil.getModRole(event.getGuild())).build()).queue();
+                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getModRole()).build()).queue();
                 return;
             }
         }

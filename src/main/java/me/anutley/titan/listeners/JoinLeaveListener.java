@@ -1,7 +1,7 @@
 package me.anutley.titan.listeners;
 
 import me.anutley.titan.database.SQLiteDataSource;
-import me.anutley.titan.database.util.GuildSettingsDBUtil;
+import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.database.util.WelcomeUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -24,7 +24,7 @@ public class JoinLeaveListener extends ListenerAdapter {
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 
-        if (GuildSettingsDBUtil.isLockdownEnabled(event.getGuild())) {
+        if (new GuildSettings(event.getGuild().getId()).isLockdown()) {
             userid = event.getUser().getId();
             return;
         }

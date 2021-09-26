@@ -1,8 +1,8 @@
 package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
-import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.database.objects.EmbedTag;
+import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.database.objects.TextTag;
 import me.anutley.titan.database.util.TagUtil;
 import me.anutley.titan.util.PermissionUtil;
@@ -21,9 +21,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -75,7 +72,7 @@ public class TagCommand extends Command {
 
         if (!RoleUtil.isTagManager(event.getMember())) {
             if (!Objects.equals(event.getSubcommandName(), "get") || !event.getSubcommandName().equals("list")) {
-                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, RoleUtil.getTagManagementRole(event.getGuild())).build()).setEphemeral(true).queue();
+                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getTagManagementRole()).build()).setEphemeral(true).queue();
                 return;
             }
         }
@@ -263,27 +260,17 @@ public class TagCommand extends Command {
 
     public void modifyTagPermissions(SlashCommandEvent event) {
 
+        GuildSettings guildSettings = new GuildSettings(event.getGuild().getId());
         if (event.getOption("role") != null) {
 
-            try (final Connection connection = SQLiteDataSource
-                    .getConnection();
-                 PreparedStatement preparedStatement = connection
-                         .prepareStatement("UPDATE guild_settings SET tag_management_role = ? WHERE guild_id = ? ")) {
-
-                preparedStatement.setString(1, event.getOption("role").getAsRole().getId());
-                preparedStatement.setString(2, event.getGuild().getId());
-
-                preparedStatement.executeUpdate();
-
-                event.replyEmbeds(new EmbedBuilder()
-                        .setDescription("The role that manages tags has been set to " + event.getOption("role").getAsRole().getAsMention())
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-            } catch (SQLException ignored) {
-            }
+            guildSettings.setTagManagementRoleId(event.getOption("role").getAsRole().getId());
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("The role that manages tags has been set to " + event.getOption("role").getAsRole().getAsMention())
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
         } else {
             event.replyEmbeds(new EmbedBuilder()
-                    .setDescription("The role that manages tags is " + RoleUtil.getTagManagementRole(event.getGuild()).getAsMention())
+                    .setDescription("The role that manages tags is " + guildSettings.getTagManagementRole().getAsMention())
                     .setColor(EmbedColour.NEUTRAL.getColour())
                     .build()).queue();
         }
