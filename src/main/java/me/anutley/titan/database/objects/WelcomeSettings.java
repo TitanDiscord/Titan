@@ -54,27 +54,27 @@ public class WelcomeSettings {
             if (!result.next()) {
                 if (this.getGuildId() == null) return this;
 
-                PreparedStatement newGuildSettings = connection
+                PreparedStatement newWelcomeSettings = connection
                         .prepareStatement("INSERT INTO welcomes (guild_id, enabled, channel_id, message, role) VALUES (?, ?, ?, ?, ?)");
 
-                newGuildSettings.setString(1, this.getGuildId());
-                newGuildSettings.setBoolean(2, this.isEnabled());
-                newGuildSettings.setString(3, this.getChannelId());
-                newGuildSettings.setString(4, this.getMessage());
-                newGuildSettings.setString(5, this.getRoleId());
-                newGuildSettings.executeUpdate(); 
+                newWelcomeSettings.setString(1, this.getGuildId());
+                newWelcomeSettings.setBoolean(2, this.isEnabled());
+                newWelcomeSettings.setString(3, this.getChannelId());
+                newWelcomeSettings.setString(4, this.getMessage());
+                newWelcomeSettings.setString(5, this.getRoleId());
+                newWelcomeSettings.executeUpdate();
             } else {
 
-                PreparedStatement editGuildSettings = connection
+                PreparedStatement editWelcomeSettings = connection
                         .prepareStatement("UPDATE welcomes set enabled = ?, channel_id = ?, message = ?, role = ? where guild_id = ?");
 
-                editGuildSettings.setBoolean(1, this.isEnabled());
-                editGuildSettings.setString(2, this.getChannelId());
-                editGuildSettings.setString(3, this.getMessage());
-                editGuildSettings.setString(4, this.getRoleId());
-                editGuildSettings.setString(5, this.getGuildId());
+                editWelcomeSettings.setBoolean(1, this.isEnabled());
+                editWelcomeSettings.setString(2, this.getChannelId());
+                editWelcomeSettings.setString(3, this.getMessage());
+                editWelcomeSettings.setString(4, this.getRoleId());
+                editWelcomeSettings.setString(5, this.getGuildId());
 
-                editGuildSettings.executeUpdate();
+                editWelcomeSettings.executeUpdate();
 
 
             }
