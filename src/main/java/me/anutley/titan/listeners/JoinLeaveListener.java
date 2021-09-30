@@ -1,8 +1,8 @@
 package me.anutley.titan.listeners;
 
 import me.anutley.titan.database.SQLiteDataSource;
-import me.anutley.titan.database.WelcomeSettings;
 import me.anutley.titan.database.objects.GuildSettings;
+import me.anutley.titan.database.objects.WelcomeSettings;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;

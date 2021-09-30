@@ -1,6 +1,7 @@
-package me.anutley.titan.database;
+package me.anutley.titan.database.objects;
 
 import me.anutley.titan.Titan;
+import me.anutley.titan.database.SQLiteDataSource;
 import net.dv8tion.jda.api.entities.Role;
 
 import java.sql.Connection;

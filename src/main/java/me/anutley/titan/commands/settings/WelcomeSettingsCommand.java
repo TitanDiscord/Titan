@@ -1,6 +1,6 @@
 package me.anutley.titan.commands.settings;
 
-import me.anutley.titan.database.WelcomeSettings;
+import me.anutley.titan.database.objects.WelcomeSettings;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
