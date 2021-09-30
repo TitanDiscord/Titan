@@ -1,8 +1,8 @@
 package me.anutley.titan.listeners;
 
 import me.anutley.titan.database.SQLiteDataSource;
+import me.anutley.titan.database.WelcomeSettings;
 import me.anutley.titan.database.objects.GuildSettings;
-import me.anutley.titan.database.util.WelcomeUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -29,47 +29,30 @@ public class JoinLeaveListener extends ListenerAdapter {
             return;
         }
 
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * from welcomes WHERE guild_id = ? ")) {
+        WelcomeSettings welcomeSettings = new WelcomeSettings(event.getGuild().getId());
 
-            preparedStatement.setString(1, event.getGuild().getId());
-            ResultSet result = preparedStatement.executeQuery();
-
-            if (WelcomeUtil.getWelcomeRole(event.getGuild()) != null) {
-                if (!event.getGuild().getSelfMember().hasPermission(Permission.MANAGE_ROLES)) return;
-                if (!event.getGuild().getSelfMember().canInteract(WelcomeUtil.getWelcomeRole(event.getGuild())))
-                    return;
-                event.getGuild().addRoleToMember(event.getMember().getId(), WelcomeUtil.getWelcomeRole(event.getGuild())).queue();
-            }
-
-            if (!result.getBoolean("enabled")) {
+        if (welcomeSettings.getRoleId() != null) {
+            if (!event.getGuild().getSelfMember().hasPermission(Permission.MANAGE_ROLES)) return;
+            if (!event.getGuild().getSelfMember().canInteract(welcomeSettings.getRole()))
                 return;
-            }
-
-            if (result.getString("channel_id") == null) {
-                return;
-            }
-
-            String message = replacePlaceholders(result.getString("message"), event.getGuild(), event.getUser());
-
-            EmbedBuilder builder = new EmbedBuilder();
-
-            if (message.contains("-showavatar")) {
-                message = message.replaceAll("-showavatar", " ");
-                builder.setThumbnail(event.getUser().getAvatarUrl());
-
-            }
-
-            event.getGuild().getTextChannelById(result.getString("channel_id")).sendMessageEmbeds(builder
-                    .setColor(EmbedColour.YES.getColour())
-                    .setDescription(message.trim()).build()).queue();
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+            event.getGuild().addRoleToMember(event.getMember().getId(), welcomeSettings.getRole()).queue();
         }
+
+        if (!welcomeSettings.isEnabled()) return;
+        if (welcomeSettings.getChannelId() == null) return;
+
+        String message = replacePlaceholders(welcomeSettings.getMessage(), event.getGuild(), event.getUser());
+
+        EmbedBuilder builder = new EmbedBuilder();
+
+        if (message.contains("-showavatar")) {
+            message = message.replaceAll("-showavatar", " ");
+            builder.setThumbnail(event.getUser().getAvatarUrl());
+        }
+
+        event.getGuild().getTextChannelById(welcomeSettings.getChannelId()).sendMessageEmbeds(builder
+                .setColor(EmbedColour.YES.getColour())
+                .setDescription(message.trim()).build()).queue();
     }
 
     @Override

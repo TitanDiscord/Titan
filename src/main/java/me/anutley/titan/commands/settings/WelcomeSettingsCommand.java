@@ -1,7 +1,6 @@
 package me.anutley.titan.commands.settings;
 
-import me.anutley.titan.database.SQLiteDataSource;
-import me.anutley.titan.database.util.WelcomeUtil;
+import me.anutley.titan.database.WelcomeSettings;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
@@ -13,10 +12,6 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class WelcomeSettingsCommand {
 
@@ -40,25 +35,16 @@ public class WelcomeSettingsCommand {
     }
 
     public void toggleWelcome(SlashCommandEvent event, boolean bool) {
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("UPDATE welcomes SET enabled = ? WHERE guild_id = ? ")) {
+        new WelcomeSettings(event.getGuild().getId())
+                .setEnabled(bool)
+                .save();
 
-            preparedStatement.setBoolean(1, bool);
-            preparedStatement.setString(2, event.getGuild().getId());
-            preparedStatement.executeUpdate();
+        EmbedBuilder builder = new EmbedBuilder();
+        if (bool) builder.setTitle("Welcome messages has been enabled!");
+        else builder.setTitle("Welcome messages has been disabled!");
 
-            EmbedBuilder builder = new EmbedBuilder();
-            if (bool) builder.setTitle("Welcome messages has been enabled!");
-            else builder.setTitle("Welcome messages has been disabled!");
-
-            builder.setColor(EmbedColour.YES.getColour());
-
-            event.replyEmbeds(builder.build()).queue();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        builder.setColor(EmbedColour.YES.getColour());
+        event.replyEmbeds(builder.build()).queue();
     }
 
     public void changeWelcomeChannel(SlashCommandEvent event) {
@@ -68,25 +54,17 @@ public class WelcomeSettingsCommand {
             return;
         }
 
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("UPDATE welcomes SET channel_id = ? WHERE guild_id = ? ")) {
+        new WelcomeSettings(event.getGuild().getId())
+                .setChannelId(event.getOption("channel").getAsGuildChannel().getId())
+                .save();
 
-            preparedStatement.setString(1, event.getOption("channel").getAsGuildChannel().getId());
-            preparedStatement.setString(2, event.getGuild().getId());
-            preparedStatement.executeUpdate();
+        EmbedBuilder builder = new EmbedBuilder();
 
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setDescription("The welcome channel has been set to " + event.getOption("channel").getAsGuildChannel().getAsMention());
+        builder.setDescription("The welcome channel has been set to " + event.getOption("channel").getAsGuildChannel().getAsMention());
+        builder.setColor(EmbedColour.YES.getColour());
 
-            builder.setColor(EmbedColour.YES.getColour());
+        event.replyEmbeds(builder.build()).queue();
 
-            event.replyEmbeds(builder.build()).queue();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public void changeWelcomeMessage(SlashCommandEvent event) {
@@ -102,26 +80,17 @@ public class WelcomeSettingsCommand {
                             "%guild_name% - The name of the guild\n" +
                             "End the message with `-showavatar`, to show add the users avatar to the join message").build()).queue();
         } else {
+            new WelcomeSettings(event.getGuild().getId())
+                    .setMessage(event.getOption("message").getAsString())
+                    .save();
 
-            try (final Connection connection = SQLiteDataSource
-                    .getConnection();
-                 PreparedStatement preparedStatement = connection
-                         .prepareStatement("UPDATE welcomes SET message = ? WHERE guild_id = ? ")) {
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setDescription("The welcome message has been set to " + event.getOption("message").getAsString());
 
-                preparedStatement.setString(1, event.getOption("message").getAsString());
-                preparedStatement.setString(2, event.getGuild().getId());
-                preparedStatement.executeUpdate();
+            builder.setColor(EmbedColour.YES.getColour());
 
-                EmbedBuilder builder = new EmbedBuilder();
-                builder.setDescription("The welcome message has been set to " + event.getOption("message").getAsString());
+            event.replyEmbeds(builder.build()).queue();
 
-                builder.setColor(EmbedColour.YES.getColour());
-
-                event.replyEmbeds(builder.build()).queue();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -137,14 +106,14 @@ public class WelcomeSettingsCommand {
         }
 
         if (event.getOption("role") == null) {
-            if (WelcomeUtil.getWelcomeRole(event.getGuild()) == null) {
+            if (new WelcomeSettings(event.getGuild().getId()).getRoleId() == null) {
                 event.replyEmbeds(new EmbedBuilder()
                         .setTitle("No welcome role set!")
                         .setColor(EmbedColour.NO.getColour())
                         .build()).queue();
             } else {
                 event.replyEmbeds(new EmbedBuilder()
-                        .setDescription("This guilds welcome role is " + WelcomeUtil.getWelcomeRole(event.getGuild()).getAsMention())
+                        .setDescription("This guilds welcome role is " + new WelcomeSettings(event.getGuild().getId()).getRole().getAsMention())
                         .setColor(EmbedColour.NEUTRAL.getColour())
                         .build()).queue();
             }
@@ -153,23 +122,14 @@ public class WelcomeSettingsCommand {
 
             if (event.getOption("role").getAsRole().getId().equals(event.getGuild().getPublicRole().getId())) id = null;
             else id = event.getOption("role").getAsRole().getId();
-            try (final Connection connection = SQLiteDataSource.getConnection();
-                 PreparedStatement preparedStatement = connection
-                         .prepareStatement("UPDATE welcomes set role = ? where guild_id = ?")) {
 
-                preparedStatement.setString(1, id);
-                preparedStatement.setString(2, event.getGuild().getId());
+            new WelcomeSettings(event.getGuild().getId()).setRoleId(id).save();
 
-                preparedStatement.executeUpdate();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("The guild's welcome role has been set to " + event.getOption("role").getAsRole().getAsMention() + "!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
 
-                event.replyEmbeds(new EmbedBuilder()
-                        .setDescription("The guild's welcome role has been set to " + event.getOption("role").getAsRole().getAsMention() + "!")
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
