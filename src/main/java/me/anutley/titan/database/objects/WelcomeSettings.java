@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class WelcomeSettings {
+
     public String guildId;
     public boolean enabled;
     public String channelId;
