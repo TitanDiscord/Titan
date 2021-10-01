@@ -1,7 +1,7 @@
 package me.anutley.titan.listeners;
 
-import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.database.objects.GuildSettings;
+import me.anutley.titan.database.objects.LeaveSettings;
 import me.anutley.titan.database.objects.WelcomeSettings;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -11,11 +11,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class JoinLeaveListener extends ListenerAdapter {
 
@@ -58,44 +53,25 @@ public class JoinLeaveListener extends ListenerAdapter {
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
 
-        if (event.getUser().getId().equals(userid)) {
-            return;
-        }
+        if (event.getUser().getId().equals(userid)) return;
 
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * from leave WHERE guild_id = ? ")) {
+        LeaveSettings leaveSettings = new LeaveSettings(event.getGuild().getId());
 
-            preparedStatement.setString(1, event.getGuild().getId());
-            ResultSet result = preparedStatement.executeQuery();
+            if (!leaveSettings.isEnabled()) return;
+            if (leaveSettings.getChannelId() == null) return;
 
-            if (!result.getBoolean("enabled")) {
-                return;
-            }
-
-            if (result.getString("channel_id") == null) {
-                return;
-            }
-
-            String message = replacePlaceholders(result.getString("message"), event.getGuild(), event.getUser());
+            String message = replacePlaceholders(leaveSettings.getMessage(), event.getGuild(), event.getUser());
 
             EmbedBuilder builder = new EmbedBuilder();
 
             if (message.contains("-showavatar")) {
                 message = message.replaceAll("-showavatar", " ");
                 builder.setThumbnail(event.getUser().getAvatarUrl());
-
             }
 
-            event.getGuild().getTextChannelById(result.getString("channel_id")).sendMessageEmbeds(builder
+            event.getGuild().getTextChannelById(leaveSettings.getChannelId()).sendMessageEmbeds(builder
                     .setColor(EmbedColour.YES.getColour())
                     .setDescription(message.trim()).build()).queue();
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
 
