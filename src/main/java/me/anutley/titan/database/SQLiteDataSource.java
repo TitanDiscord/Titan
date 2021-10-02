@@ -55,7 +55,7 @@ public class SQLiteDataSource {
         createWarnsTable();
     }
 
-    private SQLiteDataSource() {
+    public SQLiteDataSource() {
     }
 
     public static Connection getConnection() throws SQLException {
