@@ -7,14 +7,12 @@ import me.anutley.titan.util.exceptions.NoTagFoundException;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-import java.util.Objects;
-
 public class TagListener extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-        if (Objects.requireNonNull(event.getMember()).getUser().isBot()) return;
 
+        if (event.getAuthor().isBot()) return;
         if (event.getMessage().getMentionedMembers().size() == 1) {
 
             String[] args = event.getMessage().getContentRaw().split(" ");
