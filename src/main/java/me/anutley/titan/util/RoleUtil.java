@@ -1,14 +1,8 @@
 package me.anutley.titan.util;
 
-import me.anutley.titan.database.SQLiteDataSource;
-import net.dv8tion.jda.api.entities.Guild;
+import me.anutley.titan.database.objects.GuildSettings;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 
 public class RoleUtil {
@@ -37,132 +31,20 @@ public class RoleUtil {
 
 
     public static boolean isAdmin(Member member) {
-        return RoleUtil.hasRole(member, getAdminRoleId(member.getGuild())) || member.isOwner();
+        return RoleUtil.hasRole(member, new GuildSettings(member.getGuild().getId()).getAdminRoleId()) || member.isOwner();
     }
-
-    public static String getAdminRoleId(Guild guild) {
-        try (final Connection connection = SQLiteDataSource.getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM guild_settings where guild_id = ?")) {
-
-            preparedStatement.setString(1, guild.getId());
-            ResultSet result = preparedStatement.executeQuery();
-
-            return result.getString("guild_admin_role");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static Role getAdminRole(Guild guild) {
-        try (final Connection connection = SQLiteDataSource.getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM guild_settings where guild_id = ?")) {
-
-            preparedStatement.setString(1, guild.getId());
-            ResultSet result = preparedStatement.executeQuery();
-
-            return guild.getRoleById(result.getString("guild_admin_role"));
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
 
     public static boolean isMod(Member member) {
-        return RoleUtil.hasRole(member, getModRoleId(member.getGuild()));
+        return RoleUtil.hasRole(member, new GuildSettings(member.getGuild().getId()).getModRoleId());
     }
 
-    public static String getModRoleId(Guild guild) {
-        try (final Connection connection = SQLiteDataSource.getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM guild_settings where guild_id = ?")) {
-
-            preparedStatement.setString(1, guild.getId());
-            ResultSet result = preparedStatement.executeQuery();
-
-            return result.getString("guild_mod_role");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static Role getModRole(Guild guild) {
-        try (final Connection connection = SQLiteDataSource.getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM guild_settings where guild_id = ?")) {
-
-            preparedStatement.setString(1, guild.getId());
-            ResultSet result = preparedStatement.executeQuery();
-
-            return guild.getRoleById(result.getString("guild_mod_role"));
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    public static boolean isStaff (Member member) {
+    public static boolean isStaff(Member member) {
         return isAdmin(member) || isMod(member);
     }
 
-
     public static boolean isTagManager(Member member) {
-        return RoleUtil.hasRole(member, getTagManagementRoleId(member.getGuild())) || isMod(member) || isAdmin(member);
+        return RoleUtil.hasRole(member, new GuildSettings(member.getGuild().getId()).getTagManagementRoleId()) || isMod(member) || isAdmin(member);
     }
-
-    public static String getTagManagementRoleId(Guild guild) {
-        try (final Connection connection = SQLiteDataSource.getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM guild_settings where guild_id = ?")) {
-
-            preparedStatement.setString(1, guild.getId());
-            ResultSet result = preparedStatement.executeQuery();
-
-            if (result.getString("tag_management_role") == null) {
-                return getAdminRoleId(guild);
-            }
-            else {
-                return result.getString("tag_management_role");
-            }
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static Role getTagManagementRole(Guild guild) {
-        try (final Connection connection = SQLiteDataSource.getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM guild_settings where guild_id = ?")) {
-
-            preparedStatement.setString(1, guild.getId());
-            ResultSet result = preparedStatement.executeQuery();
-
-            if (result.getString("tag_management_role") == null) {
-                return guild.getRoleById(getAdminRoleId(guild));
-            }
-            else {
-                return guild.getRoleById(result.getString("tag_management_role"));
-            }
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
 
 
 }

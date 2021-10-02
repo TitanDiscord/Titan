@@ -9,7 +9,6 @@ import me.anutley.titan.commands.moderation.*;
 import me.anutley.titan.commands.settings.SettingsBaseCommand;
 import me.anutley.titan.commands.utility.*;
 import me.anutley.titan.database.GuildDatabaseInitialiser;
-import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.listeners.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -19,20 +18,18 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class Titan {
 
     public static ArrayList<Command> commands = new ArrayList<>();
+    public static JDA jda;
 
-    public static void main(String[] arguments) throws LoginException, InterruptedException, IOException, SQLException {
+    public static void main(String[] arguments) throws LoginException, InterruptedException, IOException {
 
         Config config = new Config();
-        SQLiteDataSource.getConnection();
 
-
-        JDA jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
+        jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
                 .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
                 .disableCache(CacheFlag.VOICE_STATE)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
@@ -120,7 +117,8 @@ public class Titan {
                         TagCommand.TagCommandData,
                         UserInfoCommand.UserInfoCommandData,
                         WikiCommand.WikiCommandData
-                ).queue();
+                )
+                .queue();
     }
 
     public static Command registerCommand(Command command) {
@@ -132,6 +130,9 @@ public class Titan {
         return commands;
     }
 
+    public static JDA getJda() {
+        return jda;
+    }
 
 }
 

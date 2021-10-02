@@ -1,7 +1,7 @@
 package me.anutley.titan.commands.settings;
 
-import me.anutley.titan.database.SQLiteDataSource;
-import me.anutley.titan.database.util.IllegalPingCountUtil;
+import me.anutley.titan.database.objects.PingProtectionSettings;
+import me.anutley.titan.database.objects.PingProtectionUserData;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -9,10 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -46,199 +42,139 @@ public class PingProtectionSettingsCommand {
     }
 
     public void togglePingProtection(SlashCommandEvent event, boolean bool) {
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("UPDATE ping_protection_settings SET enabled = ? WHERE guild_id = ? ")) {
 
-            preparedStatement.setBoolean(1, bool);
-            preparedStatement.setString(2, event.getGuild().getId());
-            preparedStatement.executeUpdate();
+        new PingProtectionSettings(event.getGuild().getId())
+                .setEnabled(bool)
+                .save();
 
-            EmbedBuilder builder = new EmbedBuilder();
-            if (bool) builder.setTitle("Ping protection has been enabled!");
-            else builder.setTitle("Ping protection has been disabled!");
+        EmbedBuilder builder = new EmbedBuilder();
+        if (bool) builder.setTitle("Ping protection has been enabled!");
+        else builder.setTitle("Ping protection has been disabled!");
 
-            builder.setColor(EmbedColour.YES.getColour());
+        builder.setColor(EmbedColour.YES.getColour());
 
-            event.replyEmbeds(builder.build()).queue();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        event.replyEmbeds(builder.build()).queue();
     }
 
     public void modifyPingThreshold(SlashCommandEvent event) {
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("UPDATE ping_protection_settings set threshold = ? where guild_id = ?")) {
 
-            preparedStatement.setInt(1, (int) event.getOption("amount").getAsLong());
-            preparedStatement.setString(2, event.getGuild().getId());
+        new PingProtectionSettings(event.getGuild().getId())
+                .setThreshold(Integer.parseInt(event.getOption("amount").getAsString()))
+                .save();
 
-            preparedStatement.executeUpdate();
-
-            event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("The ping protection threshold has been set to " + event.getOption("amount").getAsString())
-                    .setColor(EmbedColour.YES.getColour())
-                    .build()).queue();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        event.replyEmbeds(new EmbedBuilder()
+                .setTitle("The ping protection threshold has been set to " + event.getOption("amount").getAsString())
+                .setColor(EmbedColour.YES.getColour())
+                .build()).queue();
     }
 
     public void toggleRolePingProtection(SlashCommandEvent event, boolean bool) {
 
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * from ping_protection_settings WHERE guild_id = ? ")) {
-            preparedStatement.setString(1, event.getGuild().getId());
+        PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
+        ArrayList<String> pingProtectedRoles = new ArrayList<>();
 
-            ResultSet getPingProtectedRolesResult = preparedStatement.executeQuery();
+        if (pingProtectionSettings.getRoles() != null) {
 
-            ArrayList<String> pingProtectedRoles = new ArrayList<>();
+            ArrayList<String> pingProtectedRolesAsArrayList = new ArrayList<>(Arrays.asList(pingProtectionSettings.getRoles().toString()
+                    .replaceAll("\\[", "")
+                    .replaceAll("]", "")
+                    .split(",")));
 
-            if (getPingProtectedRolesResult.getString("roles") != null) {
-
-                ArrayList<String> pingProtectedRolesAsArrayList = new ArrayList<>(Arrays.asList(getPingProtectedRolesResult.getString("roles")
-                        .replaceAll("\\[", "")
-                        .replaceAll("]", "")
-                        .split(",")));
-
-                if (bool) {
-                    if (getPingProtectedRolesResult.getString("roles").contains(event.getOption("role").getAsRole().getId())) {
-                        event.replyEmbeds(new EmbedBuilder()
-                                .setTitle("This role is already protected from pings!")
-                                .setColor(EmbedColour.NO.getColour())
-                                .build()).queue();
-                        return;
-                    }
-
+            if (bool) {
+                if (pingProtectionSettings.getRoles().contains(event.getOption("role").getAsRole().getId())) {
                     event.replyEmbeds(new EmbedBuilder()
-                            .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
-                            .setColor(EmbedColour.YES.getColour())
-                            .build()).queue();
-
-                    pingProtectedRolesAsArrayList.add(event.getOption("role").getAsRole().getId());
-                }
-
-                if (!bool) {
-                    if (!getPingProtectedRolesResult.getString("roles").contains(event.getOption("role").getAsRole().getId())) {
-                        event.replyEmbeds(new EmbedBuilder()
-                                .setTitle("This role is not currently protected from pings!")
-                                .setColor(EmbedColour.NO.getColour())
-                                .build()).queue();
-                        return;
-                    }
-
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setDescription(event.getOption("role").getAsRole().getAsMention() + " is no longer protected from pings!")
-                            .setColor(EmbedColour.YES.getColour())
-                            .build()).queue();
-
-                    pingProtectedRolesAsArrayList.remove(event.getOption("role").getAsRole().getId());
-
-
-                }
-                pingProtectedRoles = pingProtectedRolesAsArrayList;
-
-            } else {
-                if (!bool) {
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setTitle("This role is not protected from pings!")
+                            .setTitle("This role is already protected from pings!")
                             .setColor(EmbedColour.NO.getColour())
                             .build()).queue();
                     return;
-                } else {
-                    pingProtectedRoles.add(event.getOption("role").getAsRole().getId());
-
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
-                            .setColor(EmbedColour.YES.getColour())
-                            .build()).queue();
-
                 }
-            }
 
-
-            String[] protectedRolesArray = pingProtectedRoles.toArray(new String[pingProtectedRoles.size()]);
-
-
-            PreparedStatement addPingProtectedRoleUpdate =
-                    connection.prepareStatement("UPDATE ping_protection_settings set roles = ? where guild_id = ?");
-            {
-
-                addPingProtectedRoleUpdate.setString(1, !Arrays.toString(protectedRolesArray).equals("[]") ? Arrays.toString(protectedRolesArray).replaceAll(" ", "") : null);
-                addPingProtectedRoleUpdate.setString(2, event.getGuild().getId());
-
-                addPingProtectedRoleUpdate.executeUpdate();
-
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void listPingProtectedRoles(SlashCommandEvent event) {
-        try (final Connection connection = SQLiteDataSource.getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM ping_protection_settings where guild_id = ?")) {
-
-            preparedStatement.setString(1, event.getGuild().getId());
-
-            ResultSet result = preparedStatement.executeQuery();
-
-            if (result.getString("roles") == null) {
                 event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("There are no ping protected roles!")
+                        .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
+                        .setColor(EmbedColour.YES.getColour())
+                        .build()).queue();
+
+                pingProtectedRolesAsArrayList.add(event.getOption("role").getAsRole().getId());
+            }
+
+            if (!bool) {
+                if (!pingProtectionSettings.getRoles().contains(event.getOption("role").getAsRole().getId())) {
+                    event.replyEmbeds(new EmbedBuilder()
+                            .setTitle("This role is not currently protected from pings!")
+                            .setColor(EmbedColour.NO.getColour())
+                            .build()).queue();
+                    return;
+                }
+
+                event.replyEmbeds(new EmbedBuilder()
+                        .setDescription(event.getOption("role").getAsRole().getAsMention() + " is no longer protected from pings!")
+                        .setColor(EmbedColour.YES.getColour())
+                        .build()).queue();
+
+                pingProtectedRolesAsArrayList.remove(event.getOption("role").getAsRole().getId());
+
+
+            }
+            pingProtectedRoles = pingProtectedRolesAsArrayList;
+
+        } else {
+            if (!bool) {
+                event.replyEmbeds(new EmbedBuilder()
+                        .setTitle("This role is not protected from pings!")
                         .setColor(EmbedColour.NO.getColour())
                         .build()).queue();
                 return;
+            } else {
+                pingProtectedRoles.add(event.getOption("role").getAsRole().getId());
+
+                event.replyEmbeds(new EmbedBuilder()
+                        .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
+                        .setColor(EmbedColour.YES.getColour())
+                        .build()).queue();
+
             }
-
-            String[] pingProtectedRoles = result.getString("roles")
-                    .replaceAll("\\[", "")
-                    .replaceAll("]", "")
-                    .split(",");
-
-            EmbedBuilder builder = new EmbedBuilder();
-
-            builder.setTitle("Ping Protected Roles")
-                    .setColor(EmbedColour.NEUTRAL.getColour());
-
-            StringBuilder content = new StringBuilder();
-
-            for (String string : pingProtectedRoles) {
-                content.append(event.getGuild().getRoleById(string).getAsMention());
-            }
-
-            builder.setDescription(content.toString());
-
-            event.replyEmbeds(builder.build()).queue();
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+        pingProtectionSettings.setRoles(pingProtectedRoles).save();
+    }
+
+
+    public void listPingProtectedRoles(SlashCommandEvent event) {
+
+        PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
+
+        if (pingProtectionSettings.getRoles() == null) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setTitle("There are no ping protected roles!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).queue();
+            return;
+        }
+
+        EmbedBuilder builder = new EmbedBuilder();
+
+        builder.setTitle("Ping Protected Roles")
+                .setColor(EmbedColour.NEUTRAL.getColour());
+
+        StringBuilder content = new StringBuilder();
+
+        for (String string : pingProtectionSettings.getRoles()) {
+            content.append(event.getGuild().getRoleById(string.trim()).getAsMention());
+        }
+
+        builder.setDescription(content.toString());
+        event.replyEmbeds(builder.build()).queue();
     }
 
     public void resetIllegalPings(SlashCommandEvent event) {
 
-        if (!(IllegalPingCountUtil.resetCount(event.getOption("member").getAsMember(), event.getGuild()))) {
-            event.replyEmbeds(new EmbedBuilder()
-                    .setDescription(event.getOption("member").getAsMember().getAsMention() + " is not in the illegal ping database, as they have not pinged anyone yet!")
-                    .setColor(EmbedColour.NO.getColour())
-                    .build()).queue();
-        } else {
+        new PingProtectionUserData(event.getGuild().getId(), event.getOption("member").getAsUser().getId())
+                .setCount(0)
+                .save();
+
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription(event.getOption("member").getAsUser().getAsMention() + "'s pings have been reset!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
-        }
-
     }
 
     public void changeActionWhenPingsSurpassThreshold(SlashCommandEvent event) {
@@ -252,22 +188,16 @@ public class PingProtectionSettingsCommand {
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
         } else {
-            try (PreparedStatement updateAction = SQLiteDataSource.getConnection()
-                    .prepareStatement("update ping_protection_settings set action = ? where guild_id = ? ")) {
 
-                updateAction.setString(1, event.getOption("action").getAsString());
-                updateAction.setString(2, event.getGuild().getId());
+            new PingProtectionSettings(event.getGuild().getId())
+                    .setAction(event.getOption("action").getAsString())
+                    .save();
 
-                updateAction.executeUpdate();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setTitle("The action when someone surpasses the illegal ping threshold has been set to `" + event.getOption("action").getAsString() + "`!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
 
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("The action when someone surpasses the illegal ping threshold has been set to `" + event.getOption("action").getAsString() + "`!")
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

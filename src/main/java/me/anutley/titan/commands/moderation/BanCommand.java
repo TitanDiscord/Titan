@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
@@ -35,24 +36,25 @@ public class BanCommand extends Command {
         if (messages != null) messagesToDelete = (int) messages.getAsLong();
         if (messagesToDelete > 7) messagesToDelete = 7;
 
+        GuildSettings guildSettings = new GuildSettings(event.getGuild().getId());
 
         if (!RoleUtil.isStaff(event.getMember())) {
-            event.replyEmbeds(PermissionUtil.needRoleEmbed(event, RoleUtil.getModRole(event.getGuild())).build()).setEphemeral(true).queue();
+            event.replyEmbeds(PermissionUtil.needRoleEmbed(event, guildSettings.getModRole()).build()).setEphemeral(true).queue();
             return;
         }
 
         if (RoleUtil.isMod(event.getMember()) && RoleUtil.isAdmin(user.getAsMember()) && !event.getMember().isOwner()) {
-            event.replyEmbeds(noPermissionEmbed(RoleUtil.getAdminRole(event.getGuild())).build()).setEphemeral(true).queue();
+            event.replyEmbeds(noPermissionEmbed(guildSettings.getAdminRole()).build()).setEphemeral(true).queue();
             return;
         }
 
         if (RoleUtil.isMod(event.getMember()) && RoleUtil.isMod(user.getAsMember()) && !event.getMember().isOwner()) {
-            event.replyEmbeds(noPermissionEmbed(RoleUtil.getModRole(event.getGuild())).build()).setEphemeral(true).queue();
+            event.replyEmbeds(noPermissionEmbed(guildSettings.getModRole()).build()).setEphemeral(true).queue();
             return;
         }
 
         if (RoleUtil.isAdmin(event.getMember()) && RoleUtil.isAdmin(user.getAsMember()) && !event.getMember().isOwner()) {
-            event.replyEmbeds(noPermissionEmbed(RoleUtil.getAdminRole(event.getGuild())).build()).setEphemeral(true).queue();
+            event.replyEmbeds(noPermissionEmbed(guildSettings.getAdminRole()).build()).setEphemeral(true).queue();
             return;
         }
 

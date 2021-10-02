@@ -1,8 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
-import me.anutley.titan.database.SQLiteDataSource;
-import me.anutley.titan.database.util.GuildSettingsDBUtil;
+import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -10,10 +9,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class LockdownCommand extends Command {
 
@@ -36,29 +31,23 @@ public class LockdownCommand extends Command {
     }
 
     public void toggleLockdown(SlashCommandEvent event, boolean bool) {
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("UPDATE guild_settings SET lockdown = ? WHERE guild_id = ? ")) {
 
-            preparedStatement.setBoolean(1, bool);
-            preparedStatement.setString(2, event.getGuild().getId());
-            preparedStatement.executeUpdate();
+        new GuildSettings(event.getGuild().getId())
+                .setLockdown(bool)
+                .save();
 
-            EmbedBuilder builder = new EmbedBuilder();
-            if (bool) builder.setTitle("Lockdown has been enabled! Anyone who tries to join while lockdown is enabled will be kicked");
-            else builder.setTitle("Lockdown has been disabled! Members can now join");
+        EmbedBuilder builder = new EmbedBuilder();
+        if (bool)
+            builder.setTitle("Lockdown has been enabled! Anyone who tries to join while lockdown is enabled will be kicked");
+        else builder.setTitle("Lockdown has been disabled! Members can now join");
 
-            builder.setColor(EmbedColour.YES.getColour());
+        builder.setColor(EmbedColour.YES.getColour());
 
-            event.replyEmbeds(builder.build()).queue();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        event.replyEmbeds(builder.build()).queue();
     }
 
     public void lockdownStatus(SlashCommandEvent event) {
-        boolean lockdown = GuildSettingsDBUtil.isLockdownEnabled(event.getGuild());
+        boolean lockdown = new GuildSettings(event.getGuild().getId()).isLockdown();
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(EmbedColour.NEUTRAL.getColour());

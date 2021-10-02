@@ -1,5 +1,6 @@
 package me.anutley.titan.util;
 
+import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
@@ -19,7 +20,7 @@ public class PermissionUtil {
 
         return new EmbedBuilder()
                 .setAuthor(event.getUser().getAsTag(), null, event.getUser().getAvatarUrl())
-                .setDescription("```You do not have the required roles to run this command. This command can only be ran by a member with the administrator role: ``` " + RoleUtil.getAdminRole(event.getGuild()).getAsMention())
+                .setDescription("```You do not have the required roles to run this command. This command can only be ran by a member with the administrator role: ``` " + new GuildSettings(event.getGuild().getId()).getAdminRole().getAsMention())
                 .setColor(EmbedColour.NO.getColour());
     }
 
