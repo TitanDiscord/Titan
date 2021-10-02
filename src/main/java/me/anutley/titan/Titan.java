@@ -8,7 +8,6 @@ import me.anutley.titan.commands.fun.DiceCommand;
 import me.anutley.titan.commands.moderation.*;
 import me.anutley.titan.commands.settings.SettingsBaseCommand;
 import me.anutley.titan.commands.utility.*;
-import me.anutley.titan.database.GuildDatabaseInitialiser;
 import me.anutley.titan.listeners.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -71,7 +70,6 @@ public class Titan {
 
                 // Events
                 .addEventListeners(
-                        new GuildDatabaseInitialiser(),
                         new IllegalPingListener(),
                         new JoinLeaveListener(),
                         new LockdownListener(),
