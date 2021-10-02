@@ -1,8 +1,8 @@
 package me.anutley.titan.listeners;
 
-import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.database.objects.PingProtectionSettings;
 import me.anutley.titan.database.objects.PingProtectionUserData;
+import me.anutley.titan.database.util.WarnUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -11,10 +11,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class IllegalPingListener extends ListenerAdapter {
 
@@ -33,9 +29,6 @@ public class IllegalPingListener extends ListenerAdapter {
         if (!pingProtectionSettings.isEnabled()) return;
         if (event.getMember().getUser().isBot()) return;
 
-
-        //TODO only create ping protection data if they need to be stored
-
         ping = pingProtectionUserData.getCount();
         threshold = pingProtectionSettings.getThreshold();
         action = pingProtectionSettings.getAction();
@@ -49,15 +42,14 @@ public class IllegalPingListener extends ListenerAdapter {
 
         boolean hasPinged = false;
         for (Member member : event.getMessage().getMentionedMembers()) {
-            if (member.getUser().isBot()) return;
 
+            if (member.getUser().isBot()) return;
             if (member.getId().equals(event.getMember().getId())) return;
 
             for (String string : pingProtectionSettings.getRoles()) {
                 if (RoleUtil.hasRole(member, string)) {
                     hasPinged = true;
                     ping++;
-                    System.out.println("ya");
                     break;
                 }
             }
@@ -70,7 +62,6 @@ public class IllegalPingListener extends ListenerAdapter {
                 pingProtectionUserData.setCount(0).save();
             } else {
 
-                //TODO set to custom method
                 pingProtectionUserData.setCount(ping).save();
 
                 EmbedBuilder builder = new EmbedBuilder()
@@ -108,25 +99,8 @@ public class IllegalPingListener extends ListenerAdapter {
                 event.getMember().ban(0, "Bypassing the illegal ping count!").queue();
                 break;
             case "warned":
-                try (final Connection connection = SQLiteDataSource
-                        .getConnection();
-                     PreparedStatement preparedStatement = connection
-                             .prepareStatement("insert into warnings(guild_id, user_id, moderator_id, content) VALUES (?, ?, ?, ?)")) {
+                WarnUtil.newWarn(event.getGuild().getId(), event.getMember().getId(), event.getJDA().getSelfUser().getId(), "Excessive mentioning of staff");
 
-                    preparedStatement.setString(1, event.getGuild().getId());
-                    preparedStatement.setString(2, event.getMember().getId());
-                    preparedStatement.setString(3, "SERVER");
-                    preparedStatement.setString(4, "Excessive mentioning of staff!");
-                    preparedStatement.executeUpdate();
-
-                    event.getMessage().replyEmbeds(new EmbedBuilder()
-                            .setTitle(event.getMember().getUser().getAsTag() + " has been warned for bypassing the illegal ping threshold!")
-                            .setColor(EmbedColour.YES.getColour())
-                            .build()).queue();
-
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
                 break;
         }
     }

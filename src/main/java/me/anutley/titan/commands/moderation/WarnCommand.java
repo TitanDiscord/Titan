@@ -3,6 +3,7 @@ package me.anutley.titan.commands.moderation;
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.database.objects.GuildSettings;
+import me.anutley.titan.database.util.WarnUtil;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -57,26 +58,14 @@ public class WarnCommand extends Command {
 
         if (reason.length() > 250) reason = reason.substring(0, 250);
 
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("insert into warnings(guild_id, user_id, moderator_id, content) VALUES (?, ?, ?, ?)")) {
 
-            preparedStatement.setString(1, event.getGuild().getId());
-            preparedStatement.setString(2, event.getOption("user").getAsUser().getId());
-            preparedStatement.setString(3, event.getMember().getId());
-            preparedStatement.setString(4, reason);
-            preparedStatement.executeUpdate();
+        WarnUtil.newWarn(event.getGuild().getId(), event.getOption("user").getAsUser().getId(), event.getMember().getId(), reason);
 
+        event.replyEmbeds(new EmbedBuilder()
+                .setColor(EmbedColour.YES.getColour())
+                .setDescription(event.getOption("user").getAsUser().getAsMention() + " has been warned for " + reason)
+                .build()).queue();
 
-            event.replyEmbeds(new EmbedBuilder()
-                    .setColor(EmbedColour.YES.getColour())
-                    .setDescription(event.getOption("user").getAsUser().getAsMention() + " has been warned for " + reason)
-                    .build()).queue();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public void listWarns(SlashCommandEvent event) {
@@ -120,7 +109,7 @@ public class WarnCommand extends Command {
                                 .setColor(EmbedColour.NEUTRAL.getColour());
 
                         while (warnResult.next()) {
-                            String moderator = warnResult.getString("moderator_id").contains("SERVER") ? "SERVER" : Objects.requireNonNull(event.getJDA().getUserById(warnResult.getString("moderator_id"))).getAsTag();
+                            String moderator = Objects.requireNonNull(event.getJDA().getUserById(warnResult.getString("moderator_id"))).getAsTag();
 
                             builder.addField(warnResult.getString("id") + " - by " + moderator, warnResult.getString("content"), false);
 
