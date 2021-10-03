@@ -21,7 +21,7 @@ public class KickCommand extends Command {
 
     public static CommandData KickCommandData = new CommandData("kick", "Kicks a member")
             .addOption(OptionType.USER, "user", "The member you want to kick", true)
-            .addOption(OptionType.STRING, "reason", "Reason for banning this member", true);
+            .addOption(OptionType.STRING, "reason", "Reason for kicking this member", true);
 
 
     @Override
