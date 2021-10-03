@@ -1,6 +1,6 @@
 FROM gradle:7.2.0-jdk8 AS app
 WORKDIR /build
-COPY ../../../../Downloads ./
+COPY . ./
 RUN ./gradlew build
 
 FROM openjdk:8
