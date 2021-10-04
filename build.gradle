@@ -22,6 +22,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
     implementation 'com.zaxxer:HikariCP:3.4.5'
     implementation 'org.xerial:sqlite-jdbc:3.36.0.1'
+    implementation 'com.github.docker-java:docker-java:3.2.1'
 }
 
 test {

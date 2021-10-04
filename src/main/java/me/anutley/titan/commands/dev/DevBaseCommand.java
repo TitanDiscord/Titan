@@ -12,11 +12,13 @@ public class DevBaseCommand extends Command {
 
     ShutdownCommand ShutdownCommand = new ShutdownCommand();
     EvalCommand EvalCommand = new EvalCommand();
+    UpdateCommand UpdateCommand = new UpdateCommand();
 
     public static CommandData DevBaseCommandData = new CommandData("dev", "Commands for the developer of the bot")
             .addSubcommands(new SubcommandData("shutdown", "Shutdown the bot"))
             .addSubcommands(new SubcommandData("eval", "Evaluates code")
-                    .addOption(OptionType.STRING, "code", "The code to evaluate", true));
+                    .addOption(OptionType.STRING, "code", "The code to evaluate", true))
+            .addSubcommands(new SubcommandData("update", "Updates Titan to the latest commit on GitHub"));
 
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
@@ -31,6 +33,7 @@ public class DevBaseCommand extends Command {
 
         if (event.getSubcommandName().equals("shutdown")) ShutdownCommand.shutdownCommand(event);
         if (event.getSubcommandName().equals("eval")) EvalCommand.evalCommand(event);
+        if (event.getSubcommandName().equals("update")) UpdateCommand.updateCommand(event);
 
     }
 
