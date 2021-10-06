@@ -2,6 +2,7 @@ package me.anutley.titan.commands.dev;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.WaitContainerResultCallback;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -24,21 +25,31 @@ public class UpdateCommand {
                 .setColor(EmbedColour.NEUTRAL.getColour())
                 .build()).queue();
 
-            CreateContainerResponse containerResponse = dockerClient.createContainerCmd("containrrr/watchtower")
-                    .withName("titan-update")
-                    .withCmd("--cleanup", "--run-once", "titan")
-                    .withHostConfig(HostConfig.newHostConfig()
-                            .withAutoRemove(true)
-                            .withBinds(
-                                    Bind.parse("/var/run/docker.sock:/var/run/docker.sock")
-                            )
-                    )
-                    .exec();
-            dockerClient.startContainerCmd(containerResponse.getId()).exec();
+        CreateContainerResponse containerResponse = dockerClient.createContainerCmd("containrrr/watchtower")
+                .withName("titan-update")
+                .withCmd("--cleanup", "--run-once", "titan")
+                .withHostConfig(HostConfig.newHostConfig()
+                        .withAutoRemove(true)
+                        .withBinds(
+                                Bind.parse("/var/run/docker.sock:/var/run/docker.sock")
+                        )
+                )
+                .exec();
+        dockerClient.startContainerCmd(containerResponse.getId()).exec();
 
-            event.getHook().editOriginalEmbeds(new EmbedBuilder()
-                    .setTitle("Updated!")
-                    .setColor(EmbedColour.YES.getColour())
-                    .build()).queue();
+        dockerClient.waitContainerCmd(containerResponse.getId()).exec(new WaitContainerResultCallback() {
+            @Override
+            public void onComplete() {
+                event.getHook().editOriginalEmbeds(new EmbedBuilder()
+                        .setTitle("Titan has been updated!")
+                        .setColor(EmbedColour.YES.getColour())
+                        .build()).queue();
+            }
+
+        });
+
+
+
     }
+
 }
