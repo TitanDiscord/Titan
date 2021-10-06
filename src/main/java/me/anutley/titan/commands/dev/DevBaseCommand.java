@@ -1,55 +1,27 @@
 package me.anutley.titan.commands.dev;
 
-import me.anutley.titan.commands.Command;
-import me.anutley.titan.util.enums.EmbedColour;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import me.anutley.titan.Config;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 
-public class DevBaseCommand extends Command {
+public abstract class DevBaseCommand extends ListenerAdapter {
 
-    ShutdownCommand ShutdownCommand = new ShutdownCommand();
-    EvalCommand EvalCommand = new EvalCommand();
-    UpdateCommand UpdateCommand = new UpdateCommand();
-
-    public static CommandData DevBaseCommandData = new CommandData("dev", "Commands for the developer of the bot")
-            .addSubcommands(new SubcommandData("shutdown", "Shutdown the bot"))
-            .addSubcommands(new SubcommandData("eval", "Evaluates code")
-                    .addOption(OptionType.STRING, "code", "The code to evaluate", true))
-            .addSubcommands(new SubcommandData("update", "Updates Titan to the latest commit on GitHub"));
+    public abstract void onDevCommand(GuildMessageReceivedEvent event);
+    public abstract String getName();
 
     @Override
-    public void onSlashCommand(SlashCommandEvent event) {
-        if (!event.getName().equals("dev")) return;
-        if (!event.getMember().getId().equals("804067028334936114")) {
-            event.replyEmbeds(new EmbedBuilder()
-                    .setDescription("Only <@804067028334936114> can run these commands :)")
-                    .setColor(EmbedColour.NO.getColour())
-                    .build()).setEphemeral(true).queue();
-            return;
-        }
+    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+        Message message = event.getMessage();
 
-        if (event.getSubcommandName().equals("shutdown")) ShutdownCommand.shutdownCommand(event);
-        if (event.getSubcommandName().equals("eval")) EvalCommand.evalCommand(event);
-        if (event.getSubcommandName().equals("update")) UpdateCommand.updateCommand(event);
+        if (!message.getMentionedUsers().contains(message.getJDA().getSelfUser())) return;
+        if (!message.getAuthor().getId().equals(Config.getInstance().get("BOT_OWNER"))) return;
 
+        String[] args = message.getContentRaw().split(" ");
+        if (args.length < 2 || !args[1].equalsIgnoreCase(getName())) return;
+
+        onDevCommand(event);
     }
 
-    @Override
-    public String getCommandName() {
-        return "dev";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Developer restricted commands, don't bother trying to use them :)";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/dev eval <code> " +
-                "\n/dev shutdown";
-    }
 }
