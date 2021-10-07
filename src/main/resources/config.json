@@ -1,4 +1,5 @@
 {
   "DISCORD_TOKEN": "enter token",
-  "GITHUB_TOKEN": "enter token"
+  "GITHUB_TOKEN": "enter token",
+  "BOT_OWNER": "bot owner id"
 }

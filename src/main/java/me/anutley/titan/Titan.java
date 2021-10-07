@@ -1,7 +1,10 @@
 package me.anutley.titan;
 
 import me.anutley.titan.commands.Command;
-import me.anutley.titan.commands.dev.DevBaseCommand;
+import me.anutley.titan.commands.dev.EvalCommand;
+import me.anutley.titan.commands.dev.RestartCommand;
+import me.anutley.titan.commands.dev.ShutdownCommand;
+import me.anutley.titan.commands.dev.UpdateCommand;
 import me.anutley.titan.commands.fun.AvatarCommand;
 import me.anutley.titan.commands.fun.CoinCommand;
 import me.anutley.titan.commands.fun.DiceCommand;
@@ -28,7 +31,7 @@ public class Titan {
     public static void main(String[] arguments) throws LoginException, InterruptedException, IOException {
 
         Config config = new Config();
-        SQLiteDataSource sqLiteDataSource = new SQLiteDataSource();
+        new SQLiteDataSource();
 
         jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
                 .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
@@ -37,9 +40,11 @@ public class Titan {
 
                 // Commands
                 .addEventListeners(
-
-                        //Dev Command
-                        registerCommand(new DevBaseCommand()),
+                        //Dev Commands
+                        new EvalCommand(),
+                        new RestartCommand(),
+                        new ShutdownCommand(),
+                        new UpdateCommand(),
 
                         //Fun Commands
                         registerCommand(new AvatarCommand()),
@@ -87,8 +92,6 @@ public class Titan {
         jda
                 .updateCommands()
                 .addCommands(
-                        // Dev Command
-                        DevBaseCommand.DevBaseCommandData,
 
                         // Fun Commands
                         AvatarCommand.AvatarCommandData,
