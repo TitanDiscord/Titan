@@ -1,6 +1,7 @@
 package me.anutley.titan;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.commands.dev.EvalCommand;
 import me.anutley.titan.commands.dev.ShutdownCommand;
 import me.anutley.titan.commands.fun.AvatarCommand;
 import me.anutley.titan.commands.fun.CoinCommand;
@@ -40,6 +41,7 @@ public class Titan {
 
                         //Dev Commands
                         new ShutdownCommand(),
+                        new EvalCommand(),
 
                         //Fun Commands
                         registerCommand(new AvatarCommand()),
