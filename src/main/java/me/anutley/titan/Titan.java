@@ -2,6 +2,7 @@ package me.anutley.titan;
 
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.commands.dev.EvalCommand;
+import me.anutley.titan.commands.dev.RestartCommand;
 import me.anutley.titan.commands.dev.ShutdownCommand;
 import me.anutley.titan.commands.dev.UpdateCommand;
 import me.anutley.titan.commands.fun.AvatarCommand;
@@ -39,10 +40,10 @@ public class Titan {
 
                 // Commands
                 .addEventListeners(
-
                         //Dev Commands
-                        new ShutdownCommand(),
                         new EvalCommand(),
+                        new RestartCommand(),
+                        new ShutdownCommand(),
                         new UpdateCommand(),
 
                         //Fun Commands
