@@ -3,6 +3,7 @@ package me.anutley.titan;
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.commands.dev.EvalCommand;
 import me.anutley.titan.commands.dev.ShutdownCommand;
+import me.anutley.titan.commands.dev.UpdateCommand;
 import me.anutley.titan.commands.fun.AvatarCommand;
 import me.anutley.titan.commands.fun.CoinCommand;
 import me.anutley.titan.commands.fun.DiceCommand;
@@ -42,6 +43,7 @@ public class Titan {
                         //Dev Commands
                         new ShutdownCommand(),
                         new EvalCommand(),
+                        new UpdateCommand(),
 
                         //Fun Commands
                         registerCommand(new AvatarCommand()),

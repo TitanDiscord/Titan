@@ -8,9 +8,10 @@ import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
-public class UpdateCommand {
+public class UpdateCommand extends DevBaseCommand {
 
     private final DockerClient dockerClient;
 
@@ -18,12 +19,12 @@ public class UpdateCommand {
         this.dockerClient = DockerClientBuilder.getInstance().build();
     }
 
-    public void updateCommand(SlashCommandEvent event) {
-
-        event.replyEmbeds(new EmbedBuilder()
+    @Override
+    public void onDevCommand(GuildMessageReceivedEvent event) {
+        Message message = event.getChannel().sendMessageEmbeds(new EmbedBuilder()
                 .setTitle("Updating...")
                 .setColor(EmbedColour.NEUTRAL.getColour())
-                .build()).queue();
+                .build()).complete();
 
         CreateContainerResponse containerResponse = dockerClient.createContainerCmd("containrrr/watchtower")
                 .withName("titan-update")
@@ -40,16 +41,16 @@ public class UpdateCommand {
         dockerClient.waitContainerCmd(containerResponse.getId()).exec(new WaitContainerResultCallback() {
             @Override
             public void onComplete() {
-                event.getHook().editOriginalEmbeds(new EmbedBuilder()
+                message.editMessageEmbeds(new EmbedBuilder()
                         .setTitle("Titan has been updated!")
                         .setColor(EmbedColour.YES.getColour())
                         .build()).queue();
             }
-
         });
-
-
-
     }
 
+    @Override
+    public String getName() {
+        return "update";
+    }
 }
