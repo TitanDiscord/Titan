@@ -26,7 +26,8 @@ public class EvalCommand extends DevBaseCommand {
 
     @Override
     public void onGuildMessageUpdate(@NotNull GuildMessageUpdateEvent event) {
-        if (!event.getAuthor().getId().equals(Config.getInstance().get("BOT_OWNER"))) return;
+        if (!event.getAuthor().getId().equals(Config.getInstance().get("BOT_OWNER"))
+                || !event.getMessage().getContentRaw().contains("eval")) return;
         eval(event.getMessage());
     }
 
