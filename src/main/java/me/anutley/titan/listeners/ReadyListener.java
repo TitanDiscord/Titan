@@ -7,6 +7,10 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+
 public class ReadyListener extends ListenerAdapter {
 
     @Override
@@ -14,9 +18,13 @@ public class ReadyListener extends ListenerAdapter {
 
         Logger logger = LoggerFactory.getLogger(ReadyListener.class);
 
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
+                () -> ForkJoinPool.commonPool().execute(
+                        () -> event.getJDA().getPresence().setActivity(Activity.watching("over " + event.getJDA().getGuilds().size() + " guilds!"))
+                ), 0, 1, TimeUnit.HOURS);
+
         logger.info(event.getJDA().getSelfUser().getAsTag() + " is ready in " + event.getJDA().getGuilds().size() + " guilds!");
 
-        event.getJDA().getPresence().setActivity(Activity.watching("over " + event.getJDA().getGuilds().size() + " guilds!"));
 
     }
 }
