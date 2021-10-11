@@ -11,6 +11,7 @@ import me.anutley.titan.commands.fun.DiceCommand;
 import me.anutley.titan.commands.moderation.*;
 import me.anutley.titan.commands.settings.SettingsBaseCommand;
 import me.anutley.titan.commands.utility.*;
+import me.anutley.titan.database.ReminderInitialiser;
 import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.listeners.*;
 import net.dv8tion.jda.api.JDA;
@@ -69,6 +70,7 @@ public class Titan {
                         registerCommand(new HelpCommand()),
                         registerCommand(new InviteCommand()),
                         registerCommand(new PingCommand()),
+                        registerCommand(new RemindCommand()),
                         registerCommand(new StatsCommand()),
                         registerCommand(new TagCommand()),
                         registerCommand(new UserInfoCommand()),
@@ -83,7 +85,6 @@ public class Titan {
                         new ReadyListener(),
                         new MentionListener(),
                         new TagListener()
-
                 ).build();
 
         jda.awaitReady();
@@ -116,12 +117,14 @@ public class Titan {
                         HelpCommand.HelpCommandData,
                         InviteCommand.InviteCommandData,
                         PingCommand.PingCommandData,
+                        RemindCommand.RemindCommandData,
                         StatsCommand.StatsCommandData,
                         TagCommand.TagCommandData,
                         UserInfoCommand.UserInfoCommandData,
                         WikiCommand.WikiCommandData
                 )
                 .queue();
+        ReminderInitialiser.run();
     }
 
     public static Command registerCommand(Command command) {

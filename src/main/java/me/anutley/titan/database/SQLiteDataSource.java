@@ -53,6 +53,7 @@ public class SQLiteDataSource {
         createWelcomeTable();
         createLeaveTable();
         createWarnsTable();
+        createRemindersTable();
     }
 
     public SQLiteDataSource() {
@@ -186,5 +187,22 @@ public class SQLiteDataSource {
         }
     }
 
+    public static void createRemindersTable() {
+        try (final Statement statement = getConnection().createStatement()) {
+
+            statement.execute("CREATE TABLE IF NOT EXISTS reminders (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "guild_id VARCHAR(20) NOT NULL," +
+                    "channel_id VARCHAR(20) NOT NULL," +
+                    "user_id VARCHAR(20) NOT NULL," +
+                    "content VARCHAR(4000) NOT NULL," +
+                    "time_in_milliseconds VARCHAR(50) NOT NULL" +
+                    ");");
+
+            LOGGER.info("Reminders table initialised");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
