@@ -11,12 +11,12 @@ import java.sql.SQLException;
 
 public class GuildSettings {
 
-    public String guildId;
-    public String adminRoleId;
-    public String modRoleId;
-    public String tagManagementRoleId;
-    public String muteRoleId;
-    public boolean lockdown;
+    private String guildId;
+    private String adminRoleId;
+    private String modRoleId;
+    private String tagManagementRoleId;
+    private String muteRoleId;
+    private boolean lockdown;
 
     public GuildSettings(String guildId) {
 

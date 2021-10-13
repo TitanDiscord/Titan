@@ -11,12 +11,12 @@ import java.sql.SQLException;
 
 public class EmbedTag {
 
-    public String trigger;
-    public String guildId;
-    public String title;
-    public String description;
-    public String colour;
-    public String thumbnail;
+    private String trigger;
+    private String guildId;
+    private String title;
+    private String description;
+    private String colour;
+    private String thumbnail;
 
     public EmbedTag(String trigger, String guildId) {
 

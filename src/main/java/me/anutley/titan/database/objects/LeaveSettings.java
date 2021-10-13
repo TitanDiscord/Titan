@@ -9,10 +9,10 @@ import java.sql.SQLException;
 
 public class LeaveSettings {
 
-    public String guildId;
-    public boolean enabled;
-    public String channelId;
-    public String message;
+    private String guildId;
+    private boolean enabled;
+    private String channelId;
+    private String message;
 
     public LeaveSettings(String guildId) {
         try (final Connection connection = SQLiteDataSource

@@ -11,11 +11,11 @@ import java.util.Arrays;
 
 public class PingProtectionSettings {
 
-    public String guildId;
-    public boolean enabled;
-    public ArrayList<String> roles;
-    public int threshold;
-    public String action;
+    private String guildId;
+    private boolean enabled;
+    private ArrayList<String> roles;
+    private int threshold;
+    private String action;
 
     public PingProtectionSettings(String guildId) {
 

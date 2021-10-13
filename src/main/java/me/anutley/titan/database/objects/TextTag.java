@@ -11,9 +11,9 @@ import java.sql.SQLException;
 
 public class TextTag {
 
-    public String trigger;
-    public String guildId;
-    public String content;
+    private String trigger;
+    private String guildId;
+    private String content;
 
     public TextTag(String trigger, String guildId) {
 

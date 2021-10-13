@@ -11,11 +11,11 @@ import java.sql.SQLException;
 
 public class WelcomeSettings {
 
-    public String guildId;
-    public boolean enabled;
-    public String channelId;
-    public String message;
-    public String roleId;
+    private String guildId;
+    private boolean enabled;
+    private String channelId;
+    private String message;
+    private String roleId;
 
     public WelcomeSettings(String guildId) {
         try (final Connection connection = SQLiteDataSource

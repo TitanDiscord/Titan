@@ -8,9 +8,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class PingProtectionUserData {
-    public String guildId;
-    public String userId;
-    public int count = 0;
+
+    private String guildId;
+    private String userId;
+    private int count = 0;
 
     public PingProtectionUserData(String guildId, String memberId) {
 

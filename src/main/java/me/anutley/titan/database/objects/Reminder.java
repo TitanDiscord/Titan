@@ -9,12 +9,12 @@ import java.sql.SQLException;
 
 public class Reminder {
 
-    public long id;
-    public String guildId;
-    public String channelId;
-    public String userId;
-    public String content;
-    public long timeInMilliseconds;
+    private long id;
+    private String guildId;
+    private String channelId;
+    private String userId;
+    private String content;
+    private long timeInMilliseconds;
 
     public Reminder(long id) {
 
