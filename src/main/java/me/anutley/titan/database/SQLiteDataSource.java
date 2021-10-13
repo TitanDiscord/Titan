@@ -144,7 +144,8 @@ public class SQLiteDataSource {
                     "guild_id VARCHAR(20) NOT NULL," +
                     "enabled BOOLEAN NOT NULL DEFAULT true," +
                     "channel_id VARCHAR(20)," +
-                    "message VARCHAR(500) NOT NULL DEFAULT 'Welcome %user% to %guild_name%'" +
+                    "message VARCHAR(500) NOT NULL DEFAULT 'Welcome %user% to %guild_name%'," +
+                    "role VARCHAR(20)" +
                     ");");
 
             LOGGER.info("Welcome table initialised");
