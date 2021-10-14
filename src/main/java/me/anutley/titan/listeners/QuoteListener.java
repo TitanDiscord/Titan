@@ -3,6 +3,7 @@ package me.anutley.titan.listeners;
 import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -62,7 +63,9 @@ public class QuoteListener extends ListenerAdapter {
         String messageId = matcher.group("MessageId");
 
         if (attemptEmbedSend(event, guildId, channelId, messageId))
-            event.getMessage().delete().queue(null, new ErrorHandler().ignore(ErrorResponse.MISSING_PERMISSIONS));
+            if (!event.getGuild().getMemberById(event.getJDA().getSelfUser().getId()).hasPermission(Permission.MESSAGE_MANAGE))
+                return;
+        event.getMessage().delete().queue();
 
     }
 
