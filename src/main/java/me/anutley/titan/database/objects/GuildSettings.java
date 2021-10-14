@@ -17,6 +17,7 @@ public class GuildSettings {
     private String tagManagementRoleId;
     private String muteRoleId;
     private boolean lockdown;
+    private boolean autoQuote;
 
     public GuildSettings(String guildId) {
 
@@ -36,7 +37,8 @@ public class GuildSettings {
                         .setModRoleId(result.getString("guild_mod_role"))
                         .setTagManagementRoleId(result.getString("tag_management_role"))
                         .setMuteRoleId(result.getString("mute_role"))
-                        .setLockdown(result.getBoolean("lockdown"));
+                        .setLockdown(result.getBoolean("lockdown"))
+                        .setAutoQuote(result.getBoolean("auto_quote"));
             else
                 this
                         .setGuildId(guildId);
@@ -61,7 +63,7 @@ public class GuildSettings {
                 if (this.getGuildId() == null) return this;
 
                 PreparedStatement newGuildSettings = connection
-                        .prepareStatement("INSERT INTO guild_settings (guild_id, guild_admin_role, guild_mod_role, tag_management_role, mute_role, lockdown) VALUES (?, ?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO guild_settings (guild_id, guild_admin_role, guild_mod_role, tag_management_role, mute_role, lockdown, auto_quote) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
                 newGuildSettings.setString(1, this.getGuildId());
                 newGuildSettings.setString(2, this.getAdminRoleId());
@@ -69,18 +71,20 @@ public class GuildSettings {
                 newGuildSettings.setString(4, this.getTagManagementRoleId());
                 newGuildSettings.setString(5, this.getMuteRoleId());
                 newGuildSettings.setBoolean(6, this.isLockdown());
+                newGuildSettings.setBoolean(7, this.isAutoQuote());
                 newGuildSettings.executeUpdate();
             } else {
 
                 PreparedStatement editGuildSettings = connection
-                        .prepareStatement("UPDATE guild_settings set guild_admin_role = ?, guild_mod_role = ?, tag_management_role = ?, mute_role = ?, lockdown = ? where guild_id = ?");
+                        .prepareStatement("UPDATE guild_settings set guild_admin_role = ?, guild_mod_role = ?, tag_management_role = ?, mute_role = ?, lockdown = ?, auto_quote = ? where guild_id = ?");
 
                 editGuildSettings.setString(1, this.getAdminRoleId());
                 editGuildSettings.setString(2, this.getModRoleId());
                 editGuildSettings.setString(3, this.getTagManagementRoleId());
                 editGuildSettings.setString(4, this.getMuteRoleId());
                 editGuildSettings.setBoolean(5, this.isLockdown());
-                editGuildSettings.setString(6, this.getGuildId());
+                editGuildSettings.setBoolean(6, this.isAutoQuote());
+                editGuildSettings.setString(7, this.getGuildId());
 
                 editGuildSettings.executeUpdate();
             }
@@ -131,6 +135,10 @@ public class GuildSettings {
         return lockdown;
     }
 
+    public boolean isAutoQuote() {
+        return autoQuote;
+    }
+
 
     public GuildSettings setGuildId(String guildId) {
         this.guildId = guildId;
@@ -162,4 +170,8 @@ public class GuildSettings {
         return this;
     }
 
+    public GuildSettings setAutoQuote(boolean autoQuote) {
+        this.autoQuote = autoQuote;
+        return this;
+    }
 }

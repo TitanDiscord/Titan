@@ -18,11 +18,14 @@ public class GuildSettingsCommand {
             .addSubcommands(new SubcommandData("adminrole", "Controls the guilds admin role")
                     .addOption(OptionType.ROLE, "role", "The role to set the guild's admin role to"))
             .addSubcommands(new SubcommandData("modrole", "Controls the guilds moderator role")
-                    .addOption(OptionType.ROLE, "role", "The role to set the guild's moderator role to"));
+                    .addOption(OptionType.ROLE, "role", "The role to set the guild's moderator role to"))
+            .addSubcommands(new SubcommandData("autoquote", "Controls the guilds moderator role")
+                    .addOption(OptionType.BOOLEAN, "choice", "Whether or not Titan should automatically create a quote embed when someone posts a message link"));
 
     public void guildSettingsCommand(SlashCommandEvent event) {
         if (Objects.equals(event.getSubcommandName(), "adminrole")) modifyGuildAdminRole(event);
-        if (event.getSubcommandName().equals("modrole")) modifyGuildModRole(event);
+        if (Objects.equals(event.getSubcommandName(), "modrole")) modifyGuildModRole(event);
+        if (Objects.equals(event.getSubcommandName(), "autoquote")) toggleAutoQuote(event);
     }
 
     public void modifyGuildAdminRole(SlashCommandEvent event) {
@@ -45,14 +48,12 @@ public class GuildSettingsCommand {
             return;
         }
 
-        guildSettings.setAdminRoleId(event.getOption("role").getAsRole().getId())
-                .save();
+        guildSettings.setAdminRoleId(event.getOption("role").getAsRole().getId()).save();
 
         event.replyEmbeds(new EmbedBuilder()
                 .setDescription("The guild's admin role has been set to " + event.getOption("role").getAsRole().getAsMention() + "!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
-
 
     }
 
@@ -72,7 +73,6 @@ public class GuildSettingsCommand {
             return;
         }
 
-
         guildSettings.setModRoleId(event.getOption("role").getAsRole().getId()).save();
 
         event.replyEmbeds(new EmbedBuilder()
@@ -82,4 +82,36 @@ public class GuildSettingsCommand {
 
     }
 
+    public void toggleAutoQuote(SlashCommandEvent event) {
+
+        GuildSettings guildSettings = new GuildSettings(event.getGuild().getId());
+
+        if (event.getOption("choice") == null) {
+            EmbedBuilder builder = new EmbedBuilder()
+                    .setColor(EmbedColour.NEUTRAL.getColour());
+
+            if (guildSettings.isAutoQuote())
+                builder.setTitle("Auto-quoting is currently enabled");
+
+            else
+                builder.setTitle("Auto-quoting is currently disabled");
+
+            event.replyEmbeds(builder.build()).queue();
+            return;
+        }
+
+        boolean choice = event.getOption("choice").getAsBoolean();
+
+        EmbedBuilder builder = new EmbedBuilder();
+
+        if (choice)
+            builder.setTitle("Auto-quoting has been enabled!")
+                    .setColor(EmbedColour.YES.getColour());
+        else
+            builder.setTitle("Auto-quoting has been disabled!")
+                    .setColor(EmbedColour.NO.getColour());
+
+        guildSettings.setAutoQuote(choice).save();
+        event.replyEmbeds(builder.build()).queue();
+    }
 }
