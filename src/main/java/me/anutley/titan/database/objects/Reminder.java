@@ -9,21 +9,21 @@ import java.sql.SQLException;
 
 public class Reminder {
 
-    private long id;
+    private String id;
     private String guildId;
     private String channelId;
     private String userId;
     private String content;
     private long timeInMilliseconds;
 
-    public Reminder(long id) {
+    public Reminder(String id) {
 
         try (final Connection connection = SQLiteDataSource
                 .getConnection();
              PreparedStatement preparedStatement = connection
                      .prepareStatement("SELECT * FROM reminders WHERE id = ? ")) {
 
-            preparedStatement.setLong(1, id);
+            preparedStatement.setString(1, id);
 
             ResultSet result = preparedStatement.executeQuery();
 
@@ -36,10 +36,12 @@ public class Reminder {
                         .setContent(result.getString("content"))
                         .setTimeInMilliseconds(result.getLong("time_in_milliseconds"));
 
-            else
-                this
-                        .setId(id);
+            else {
+                if (id != null)
+                    this
+                            .setId(id);
 
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -53,7 +55,7 @@ public class Reminder {
              PreparedStatement preparedStatement = connection
                      .prepareStatement("SELECT * FROM reminders WHERE id = ? ")) {
 
-            preparedStatement.setLong(1, this.getId());
+            preparedStatement.setString(1, this.getId());
 
             ResultSet result = preparedStatement.executeQuery();
 
@@ -68,6 +70,10 @@ public class Reminder {
                 newReminder.setString(4, this.getContent());
                 newReminder.setLong(5, this.getTimeInMilliseconds());
                 newReminder.executeUpdate();
+
+                ResultSet rs = newReminder.getGeneratedKeys();
+
+                this.setId(rs.getString(1));
             } else {
                 PreparedStatement editReminder = connection
                         .prepareStatement("UPDATE reminders set guild_id = ? and channel_id = ? and user_id = ? and content = ? and time_in_milliseconds = ? where id = ?");
@@ -77,7 +83,7 @@ public class Reminder {
                 editReminder.setString(3, this.getUserId());
                 editReminder.setString(4, this.getContent());
                 editReminder.setLong(5, this.getTimeInMilliseconds());
-                editReminder.setLong(6, this.getId());
+                editReminder.setString(6, this.getId());
                 editReminder.executeUpdate();
             }
 
@@ -87,7 +93,7 @@ public class Reminder {
         return this;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -112,7 +118,7 @@ public class Reminder {
     }
 
 
-    public Reminder setId(long id) {
+    public Reminder setId(String id) {
         this.id = id;
         return this;
     }

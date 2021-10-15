@@ -11,38 +11,16 @@ import java.util.ArrayList;
 
 public class ReminderUtil {
 
-    public static long getLastAutoIncrementValue() {
-
-        long highestValue = 0;
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement preparedStatement = connection
-                     .prepareStatement("SELECT * FROM reminders")) {
-            ResultSet result = preparedStatement.executeQuery();
-
-            while (result.next()) {
-                if (highestValue < result.getLong("id"))
-                    highestValue = result.getLong("id");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return highestValue;
-    }
-
     public static ArrayList<Reminder> getReminders() {
 
         ArrayList<Reminder> reminders = new ArrayList<>();
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
+        try (final Connection connection = SQLiteDataSource.getConnection();
              PreparedStatement preparedStatement = connection
                      .prepareStatement("SELECT * FROM reminders")) {
             ResultSet result = preparedStatement.executeQuery();
 
             while (result.next()) {
-                reminders.add(new Reminder(result.getLong("id"))
+                reminders.add(new Reminder(result.getString("id"))
                         .setGuildId(result.getString("guild_id"))
                         .setChannelId(result.getString("channel_id"))
                         .setUserId(result.getString("user_id"))
@@ -69,13 +47,13 @@ public class ReminderUtil {
         return userReminders;
     }
 
-    public static void removeReminderById(long id) {
+    public static void removeReminderById(String id) {
         try (final Connection connection = SQLiteDataSource
                 .getConnection();
              PreparedStatement preparedStatement = connection
                      .prepareStatement("DELETE from reminders where id = ?")) {
 
-            preparedStatement.setLong(1, id);
+            preparedStatement.setString(1, id);
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {

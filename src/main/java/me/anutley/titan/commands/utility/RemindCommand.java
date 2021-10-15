@@ -30,7 +30,6 @@ public class RemindCommand extends Command {
             .addSubcommands(new SubcommandData("remove", "Removes a specific reminder")
                     .addOption(OptionType.INTEGER, "id", "The id of the reminder you want to remove", true));
 
-
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
         if (!event.getName().equals("remind")) return;
@@ -64,7 +63,7 @@ public class RemindCommand extends Command {
                         (((hours * 60) * 60) * 1000) +
                         ((((days * 24) * 60) * 60) * 1000) + System.currentTimeMillis();
 
-        Reminder reminder = new Reminder(ReminderUtil.getLastAutoIncrementValue() + 1)
+        Reminder reminder = new Reminder(null)
                 .setGuildId(event.getGuild().getId())
                 .setChannelId(event.getChannel().getId())
                 .setUserId(event.getUser().getId())
@@ -115,7 +114,7 @@ public class RemindCommand extends Command {
     }
 
     public void getReminderInfo(SlashCommandEvent event) {
-        Reminder reminder = new Reminder(event.getOption("id").getAsLong());
+        Reminder reminder = new Reminder(event.getOption("id").getAsString());
 
         if (!event.getGuild().getId().equals(reminder.getGuildId()) && !event.getUser().getId().equals(reminder.getUserId()))
             return;
@@ -136,11 +135,11 @@ public class RemindCommand extends Command {
 
         ArrayList<Reminder> reminders = ReminderUtil.getUsersReminders(event.getGuild().getId(), event.getUser().getId());
 
-        long reminderId = event.getOption("id").getAsLong();
+        String reminderId = event.getOption("id").getAsString();
 
         Reminder reminder = new Reminder(reminderId);
 
-        if (reminders.contains(reminder)) {
+        if (reminders.stream().anyMatch(r -> Objects.equals(r.getId(), reminder.getId()))) {
             event.replyEmbeds(new EmbedBuilder()
                     .setTitle("Reminder " + reminderId + " has been deleted!")
                     .setColor(EmbedColour.NO.getColour())
@@ -150,7 +149,7 @@ public class RemindCommand extends Command {
         } else {
             event.replyEmbeds(new EmbedBuilder()
                     .setTitle("You do not have a reminder in this guild with that ID")
-                    .setColor(EmbedColour.YES.getColour())
+                    .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
         }
     }
