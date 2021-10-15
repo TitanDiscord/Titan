@@ -15,14 +15,14 @@ public class RestartCommand extends DevBaseCommand {
     @Override
     public void onDevCommand(GuildMessageReceivedEvent event) {
 
+        event.getMessage().addReaction("accepted:898671459126378517").queue();
+
         try {
             dockerClient.restartContainerCmd("titan").exec();
         } catch (Exception e) {
             event.getMessage().addReaction("denied:898671458954379276").queue();
-            return;
         }
 
-        event.getMessage().addReaction("accepted:898671459126378517").queue();
     }
 
     @Override
