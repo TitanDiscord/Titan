@@ -2,8 +2,6 @@ package me.anutley.titan.commands.dev;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DockerClientBuilder;
-import me.anutley.titan.util.enums.EmbedColour;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class RestartCommand extends DevBaseCommand {
@@ -16,11 +14,15 @@ public class RestartCommand extends DevBaseCommand {
 
     @Override
     public void onDevCommand(GuildMessageReceivedEvent event) {
-        event.getChannel().sendMessageEmbeds(new EmbedBuilder()
-                .setTitle("Restarting!")
-                .setColor(EmbedColour.NEUTRAL.getColour())
-                .build()).queue();
-        dockerClient.restartContainerCmd("titan").exec();
+
+        try {
+            dockerClient.restartContainerCmd("titan").exec();
+        } catch (Exception e) {
+            event.getMessage().addReaction("denied:898671458954379276").queue();
+            return;
+        }
+
+        event.getMessage().addReaction("accepted:898671459126378517").queue();
     }
 
     @Override
