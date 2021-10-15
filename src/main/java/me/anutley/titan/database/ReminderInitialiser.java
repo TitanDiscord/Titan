@@ -32,7 +32,7 @@ public class ReminderInitialiser extends ListenerAdapter {
 
                     MessageEmbed reminderEmbed = new EmbedBuilder()
                             .setColor(EmbedColour.NEUTRAL.getColour())
-                            .setDescription("You asked me to remind you " + TimeFormat.RELATIVE.format(reminder.getTimeInMilliseconds()) + " about: " + reminder.getContent())
+                            .setDescription("You asked me to remind you " + TimeFormat.RELATIVE.format(reminder.getTimeCreated()) + " about: \n" + reminder.getContent())
                             .build();
 
                     if (textChannel == null) {

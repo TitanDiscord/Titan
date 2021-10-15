@@ -50,7 +50,7 @@ public class RemindCommand extends Command {
             event.replyEmbeds(new EmbedBuilder()
                     .setTitle("You need to fill out at least one of the time options!")
                     .setColor(EmbedColour.NO.getColour())
-                    .build()).queue();
+                    .build()).setEphemeral(true).queue();
             return;
         }
 
@@ -69,6 +69,7 @@ public class RemindCommand extends Command {
                 .setUserId(event.getUser().getId())
                 .setContent(event.getOption("content").getAsString())
                 .setTimeInMilliseconds(totalTimeInMs)
+                .setTimeCreated(System.currentTimeMillis())
                 .save();
 
         event.replyEmbeds(new EmbedBuilder()

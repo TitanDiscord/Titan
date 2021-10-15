@@ -15,6 +15,7 @@ public class Reminder {
     private String userId;
     private String content;
     private long timeInMilliseconds;
+    private long timeCreated;
 
     public Reminder(String id) {
 
@@ -34,7 +35,8 @@ public class Reminder {
                         .setChannelId(result.getString("channel_id"))
                         .setUserId(result.getString("user_id"))
                         .setContent(result.getString("content"))
-                        .setTimeInMilliseconds(result.getLong("time_in_milliseconds"));
+                        .setTimeInMilliseconds(result.getLong("time_in_milliseconds"))
+                        .setTimeCreated(result.getLong("time_created"));
 
             else {
                 if (id != null)
@@ -62,13 +64,14 @@ public class Reminder {
             if (!result.next()) {
 
                 PreparedStatement newReminder = connection
-                        .prepareStatement("INSERT INTO reminders (guild_id, channel_id, user_id, content, time_in_milliseconds) VALUES (?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO reminders (guild_id, channel_id, user_id, content, time_in_milliseconds, time_created) VALUES (?, ?, ?, ?, ?, ?)");
 
                 newReminder.setString(1, this.getGuildId());
                 newReminder.setString(2, this.getChannelId());
                 newReminder.setString(3, this.getUserId());
                 newReminder.setString(4, this.getContent());
                 newReminder.setLong(5, this.getTimeInMilliseconds());
+                newReminder.setLong(6, this.getTimeCreated());
                 newReminder.executeUpdate();
 
                 ResultSet rs = newReminder.getGeneratedKeys();
@@ -76,14 +79,15 @@ public class Reminder {
                 this.setId(rs.getString(1));
             } else {
                 PreparedStatement editReminder = connection
-                        .prepareStatement("UPDATE reminders set guild_id = ? and channel_id = ? and user_id = ? and content = ? and time_in_milliseconds = ? where id = ?");
+                        .prepareStatement("UPDATE reminders set guild_id = ? and channel_id = ? and user_id = ? and content = ? and time_in_milliseconds = ? and time_created = ? where id = ?");
 
                 editReminder.setString(1, this.getGuildId());
                 editReminder.setString(2, this.getChannelId());
                 editReminder.setString(3, this.getUserId());
                 editReminder.setString(4, this.getContent());
                 editReminder.setLong(5, this.getTimeInMilliseconds());
-                editReminder.setString(6, this.getId());
+                editReminder.setLong(6, this.getTimeCreated());
+                editReminder.setString(7, this.getId());
                 editReminder.executeUpdate();
             }
 
@@ -117,6 +121,10 @@ public class Reminder {
         return timeInMilliseconds;
     }
 
+    public long getTimeCreated() {
+        return timeCreated;
+    }
+
 
     public Reminder setId(String id) {
         this.id = id;
@@ -145,6 +153,11 @@ public class Reminder {
 
     public Reminder setTimeInMilliseconds(long timeInMilliseconds) {
         this.timeInMilliseconds = timeInMilliseconds;
+        return this;
+    }
+
+    public Reminder setTimeCreated(long timeCreated) {
+        this.timeCreated = timeCreated;
         return this;
     }
 
