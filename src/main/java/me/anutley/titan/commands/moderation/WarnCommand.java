@@ -152,7 +152,7 @@ public class WarnCommand extends Command {
 
         ArrayList<Warning> warnings = WarnUtil.getUsersWarnings(event.getGuild().getId(), user.getId());
 
-        if (warnings.size() > 1) {
+        if (warnings.size() >= 1) {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription(user.getAsMention() + "'s warnings have been cleared!")
                     .setColor(EmbedColour.YES.getColour())
