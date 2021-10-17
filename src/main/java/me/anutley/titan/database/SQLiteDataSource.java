@@ -180,7 +180,8 @@ public class SQLiteDataSource {
                     "guild_id VARCHAR(20) NOT NULL," +
                     "user_id VARCHAR(20) NOT NULL," +
                     "moderator_id VARCHAR(20) NOT NULL," +
-                    "content VARCHAR(250) NOT NULL" +
+                    "content VARCHAR(250) NOT NULL," +
+                    "time_created VARCHAR(50) NOT NULL " +
                     ");");
 
             LOGGER.info("Warnings table initialised");

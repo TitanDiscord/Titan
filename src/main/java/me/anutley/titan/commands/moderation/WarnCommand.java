@@ -1,23 +1,22 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
-import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.database.objects.GuildSettings;
+import me.anutley.titan.database.objects.Warning;
 import me.anutley.titan.database.util.WarnUtil;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.utils.TimeFormat;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class WarnCommand extends Command {
@@ -29,9 +28,10 @@ public class WarnCommand extends Command {
             .addSubcommands(new SubcommandData("list", "Lists all the warnings of a user")
                     .addOption(OptionType.USER, "user", "The user to warn", true))
             .addSubcommands(new SubcommandData("remove", "Removes a warn from a user by its punishment id")
+                    .addOption(OptionType.USER, "user", "The user that has the warning you want to remove", true)
                     .addOption(OptionType.STRING, "id", "The id of the warn you want to remove (Can be found by doing /warn list)", true))
             .addSubcommands(new SubcommandData("clear", "Clears all warns from a user")
-                    .addOption(OptionType.USER, "user", "The user whose warns you want to clear"));
+                    .addOption(OptionType.USER, "user", "The user whose warns you want to clear", true));
 
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
@@ -40,7 +40,7 @@ public class WarnCommand extends Command {
 
         if (!RoleUtil.isStaff(event.getMember())) {
             if (!event.getSubcommandName().equals("list")) {
-                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getModRole()).build()).queue();
+                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getModRole()).build()).setEphemeral(true).queue();
                 return;
             }
         }
@@ -55,156 +55,116 @@ public class WarnCommand extends Command {
     public void addWarn(SlashCommandEvent event) {
 
         String reason = event.getOption("reason").getAsString();
+        boolean trimmed = false;
 
-        if (reason.length() > 250) reason = reason.substring(0, 250);
+        if (reason.length() > 1024) {
+            reason = reason.substring(0, 1024);
+            trimmed = true;
+        }
 
-
-        WarnUtil.newWarn(event.getGuild().getId(), event.getOption("user").getAsUser().getId(), event.getMember().getId(), reason);
+        new Warning(null)
+                .setGuildId(event.getGuild().getId())
+                .setUserId(event.getOption("user").getAsUser().getId())
+                .setModeratorId(event.getMember().getId())
+                .setContent(reason)
+                .setTimeCreated(System.currentTimeMillis())
+                .save();
 
         event.replyEmbeds(new EmbedBuilder()
                 .setColor(EmbedColour.YES.getColour())
-                .setDescription(event.getOption("user").getAsUser().getAsMention() + " has been warned for " + reason)
+                .setDescription(event.getOption("user").getAsUser().getAsMention() + " has been warned for " + (trimmed ? reason + "(Trimmed to 1024 chars)" : reason))
                 .build()).queue();
 
     }
 
     public void listWarns(SlashCommandEvent event) {
-        int count;
 
-        try (final Connection connection = SQLiteDataSource
-                .getConnection();
-             PreparedStatement countQuery = connection
-                     .prepareStatement("SELECT COUNT(*) FROM warnings WHERE guild_id = ? and user_id = ?")) {
-
-            countQuery.setString(1, event.getGuild().getId());
-            countQuery.setString(2, event.getOption("user").getAsUser().getId());
+        User user = event.getOption("user").getAsUser();
+        ArrayList<Warning> warnings = WarnUtil.getUsersWarnings(event.getGuild().getId(), user.getId());
+        int count = warnings.size();
+        int warningCount = 0;
+        int pageNumber = 0;
 
 
-            try (final ResultSet countResult = countQuery.executeQuery()) {
-                count = countResult.getInt("COUNT(*)");
+        for (int i = 0; i < count; i += 25) {
+
+            pageNumber++;
+
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setAuthor("Warnings for " + user.getAsTag(), null, user.getAvatarUrl())
+                    .setColor(EmbedColour.NEUTRAL.getColour())
+                    .setFooter("Page " + pageNumber);
+
+            for (int j = 0; j < 25; j++) {
+                if (warningCount >= count) break;
+
+                Warning warning = warnings.get(warningCount);
+
+                User moderator = event.getJDA().getUserById(warning.getModeratorId());
+                builder.addField(warning.getId() + " - by " + moderator.getAsTag() + " - " + TimeFormat.DATE_TIME_LONG.format(warning.getTimeCreated()), warning.getContent(), false);
+                warningCount++;
             }
 
-            final PreparedStatement warnQuery = SQLiteDataSource
-                    .getConnection()
-                    .prepareStatement("SELECT * FROM warnings WHERE guild_id = ? and user_id = ?");
+            if (pageNumber == 1)
+                event.replyEmbeds(builder.setDescription("**ID - Moderator** \nReason")
+                        .build()).queue();
+            else
+                event.getChannel().sendMessageEmbeds(builder.build()).queue();
 
-            warnQuery.setString(1, event.getGuild().getId());
-            warnQuery.setString(2, event.getOption("user").getAsUser().getId());
-
-
-            try (final ResultSet warnResult = warnQuery.executeQuery()) {
-                int tagCount = 0;
-                int pageNumber = 0;
-
-                if (count != 0) {
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setTitle("Warnings for " + event.getOption("user").getAsUser().getAsTag())
-                            .setColor(EmbedColour.NEUTRAL.getColour())
-                            .setDescription("Format: \n**Punishment ID** \nPunishment Description\n ").build()).queue();
-
-                    for (int i = 0; i < count; i += 24) {
-                        pageNumber++;
-                        EmbedBuilder builder = new EmbedBuilder();
-                        builder.setTitle("Page " + pageNumber)
-                                .setColor(EmbedColour.NEUTRAL.getColour());
-
-                        while (warnResult.next()) {
-                            String moderator = Objects.requireNonNull(event.getJDA().getUserById(warnResult.getString("moderator_id"))).getAsTag();
-
-                            builder.addField(warnResult.getString("id") + " - by " + moderator, warnResult.getString("content"), false);
-
-                            tagCount++;
-
-                            if (tagCount % 24 == 0) break;
-
-                        }
-                        event.getChannel().sendMessageEmbeds(builder.build()).queue();
-                    }
-                    connection.close();
-                } else {
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setDescription(event.getOption("user").getAsMember().getAsMention() + " has no warnings!")
-                            .setColor(EmbedColour.NO.getColour())
-                            .build()).queue();
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+        if (pageNumber == 0)
+            event.replyEmbeds(new EmbedBuilder()
+                    .setTitle("They have no warnings!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).queue();
 
     }
 
     public void removeWarn(SlashCommandEvent event) {
-        try {
-            PreparedStatement preparedStatement = SQLiteDataSource
-                    .getConnection()
-                    .prepareStatement("select * FROM warnings WHERE id = ? and guild_id = ?");
 
-            preparedStatement.setString(1, event.getOption("id").getAsString());
-            preparedStatement.setString(2, event.getGuild().getId());
-            ResultSet result = preparedStatement.executeQuery();
+        String id = event.getOption("id").getAsString();
+        User user = event.getOption("user").getAsUser();
 
-            if (result.next()) {
-                result.close();
-                PreparedStatement delete = SQLiteDataSource
-                        .getConnection()
-                        .prepareStatement("delete FROM warnings WHERE id = ? and guild_id = ?");
+        Warning warning = new Warning(id);
 
-                delete.setString(1, event.getOption("id").getAsString());
-                delete.setString(2, event.getGuild().getId());
-                delete.executeUpdate();
+        ArrayList<Warning> warnings = WarnUtil.getUsersWarnings(event.getGuild().getId(), user.getId());
 
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("Warning (" + event.getOption("id").getAsString() + ") has been deleted!")
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-            } else {
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("A warning with the id of `" + event.getOption("id").getAsString() + "` could not be found!")
-                        .setColor(EmbedColour.NO.getColour())
-                        .build()).queue();
-            }
+        if (warnings.stream().anyMatch(w -> Objects.equals(w.getId(), warning.getId()))) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setTitle("Warning (" + event.getOption("id").getAsString() + ") has been deleted!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
+            WarnUtil.removeWarningById(id);
 
-
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("A warning with the id of `" + event.getOption("id").getAsString() + "` for " + user.getAsMention() + " could not be found!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).queue();
         }
+
+
     }
 
     public void clearWarns(SlashCommandEvent event) {
-        try {
-            PreparedStatement preparedStatement = SQLiteDataSource
-                    .getConnection()
-                    .prepareStatement("select * FROM warnings WHERE user_id = ? and guild_id = ?");
 
-            preparedStatement.setString(1, event.getOption("user").getAsUser().getId());
-            preparedStatement.setString(2, event.getGuild().getId());
-            ResultSet result = preparedStatement.executeQuery();
+        User user = event.getOption("user").getAsUser();
 
-            if (result.next()) {
-                PreparedStatement delete = SQLiteDataSource
-                        .getConnection()
-                        .prepareStatement("delete FROM warnings WHERE user_id = ? and guild_id = ?");
+        ArrayList<Warning> warnings = WarnUtil.getUsersWarnings(event.getGuild().getId(), user.getId());
 
-                result.close();
+        if (warnings.size() > 1) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription(user.getAsMention() + "'s warnings have been cleared!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
 
-                delete.setString(1, event.getOption("user").getAsUser().getId());
-                delete.setString(2, event.getGuild().getId());
-                delete.executeUpdate();
+            WarnUtil.clearUsersWarnings(event.getGuild().getId(), user.getId());
 
-                event.replyEmbeds(new EmbedBuilder()
-                        .setDescription(event.getOption("user").getAsUser().getAsMention() + "'s warnings have been cleared!")
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-            } else {
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle(event.getOption("user").getAsUser().getAsMention() + "does not have any warnings")
-                        .setColor(EmbedColour.NO.getColour())
-                        .build()).queue();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription(user.getAsMention() + " does not have any warnings")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).queue();
         }
     }
 
