@@ -112,6 +112,11 @@ public class RemindCommand extends Command {
 
             content.setLength(0);
         }
+        if (pageNumber == 0)
+            event.replyEmbeds(new EmbedBuilder()
+                    .setTitle("You have no reminders!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).queue();
     }
 
     public void getReminderInfo(SlashCommandEvent event) {
