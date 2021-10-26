@@ -1,5 +1,6 @@
 package me.anutley.titan.commands.utility;
 
+import me.anutley.titan.Config;
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.RolePermissions;
 import me.anutley.titan.util.PermissionUtil;
@@ -50,7 +51,7 @@ public class RolePermissionsCommand {
             return;
         }
 
-        if (!event.getMember().canInteract(role)) {
+        if (!event.getMember().canInteract(role) || event.getUser().getId().equals(Config.getInstance().get("BOT_OWNER"))) {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription("You cannot modify the permissions of " + role.getAsMention() + " because it is either your highest role, or above you in the hierarchy!")
                     .setColor(EmbedColour.NO.getColour())
@@ -90,7 +91,7 @@ public class RolePermissionsCommand {
         String perm = event.getOption("perm").getAsString();
 
 
-        if (!event.getMember().canInteract(role)) {
+        if (!event.getMember().canInteract(role) || event.getUser().getId().equals(Config.getInstance().get("BOT_OWNER"))) {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription("You cannot modify the permissions of " + role.getAsMention() + " because it is either your highest role, or above you in the hierarchy")
                     .setColor(EmbedColour.NO.getColour())
@@ -175,7 +176,7 @@ public class RolePermissionsCommand {
         StringBuilder perms = new StringBuilder();
 
         for (String perm : permissions) {
-            perms.append(perm).append("\\n");
+            perms.append(perm).append("\n");
         }
 
         rolePermissions.setPermissions(permissions).save();
