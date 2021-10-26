@@ -1,13 +1,19 @@
 package me.anutley.titan.commands;
 
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.Permission;
 
-public abstract class Command extends ListenerAdapter {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    public abstract String getCommandName();
-    public abstract String getCommandDescription();
-    public abstract String getCommandUsage();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Command {
 
-
+    String name();
+    String description();
+    String permission();
+    Permission selfPermission() default Permission.UNKNOWN;
 
 }

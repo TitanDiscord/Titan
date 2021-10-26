@@ -1,15 +1,14 @@
 package me.anutley.titan.commands.settings;
 
+import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.WelcomeSettings;
-import me.anutley.titan.util.PermissionUtil;
-import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
-import me.anutley.titan.util.embeds.errors.NotTextChannelEmbed;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 
@@ -20,39 +19,39 @@ public class WelcomeSettingsCommand {
             .addSubcommands(new SubcommandData("enable", "Enables Titan welcoming new members"))
             .addSubcommands(new SubcommandData("disable", "Disables Titan welcoming new members"))
             .addSubcommands(new SubcommandData("channel", "Changes the channel Titan should send welcome messages to")
-                    .addOption(OptionType.CHANNEL, "channel", "The channel Titan should send welcome messages to", true))
+                    .addOptions(new OptionData(OptionType.CHANNEL, "channel", "The channel Titan should send welcome messages to", true).setChannelTypes(ChannelType.TEXT)))
             .addSubcommands(new SubcommandData("message", "The message Titan should send when someone joins (Send without option to get a list of placeholders)")
                     .addOption(OptionType.STRING, "message", "The message Titan should send when someone joins"))
             .addSubcommands(new SubcommandData("role", "The role Titan should give to users when they join. Set to @everyone to disable")
                     .addOption(OptionType.ROLE, "role", "The role Titan should give to users when they join"));
 
-    public void welcomeSettingsCommand(SlashCommandEvent event) {
-        if (event.getSubcommandName().equals("enable")) toggleWelcome(event, true);
-        if (event.getSubcommandName().equals("disable")) toggleWelcome(event, false);
-        if (event.getSubcommandName().equals("channel")) changeWelcomeChannel(event);
-        if (event.getSubcommandName().equals("message")) changeWelcomeMessage(event);
-        if (event.getSubcommandName().equals("role")) changeWelcomeRole(event);
-    }
 
-    public void toggleWelcome(SlashCommandEvent event, boolean bool) {
+    @Command(name = "settings.welcome.enable", description = "Enables Titan welcoming new members", permission = "command.settings.welcome.enable")
+    public static void enableWelcome(SlashCommandEvent event) {
         new WelcomeSettings(event.getGuild().getId())
-                .setEnabled(bool)
+                .setEnabled(true)
                 .save();
 
-        EmbedBuilder builder = new EmbedBuilder();
-        if (bool) builder.setTitle("Welcome messages has been enabled!");
-        else builder.setTitle("Welcome messages has been disabled!");
-
-        builder.setColor(EmbedColour.YES.getColour());
-        event.replyEmbeds(builder.build()).queue();
+        event.replyEmbeds(new EmbedBuilder()
+                .setDescription("Welcome messages has been enabled!")
+                .setColor(EmbedColour.YES.getColour())
+                .build()).queue();
     }
 
-    public void changeWelcomeChannel(SlashCommandEvent event) {
+    @Command(name = "settings.welcome.disable", description = "Disables Titan welcoming new members", permission = "command.settings.welcome.disable")
+    public void disableWelcome(SlashCommandEvent event) {
+        new WelcomeSettings(event.getGuild().getId())
+                .setEnabled(false)
+                .save();
 
-        if (!event.getOption("channel").getChannelType().equals(ChannelType.TEXT)) {
-            event.replyEmbeds(NotTextChannelEmbed.Embed().build()).queue();
-            return;
-        }
+        event.replyEmbeds(new EmbedBuilder()
+                .setDescription("Welcome messages has been disabled!")
+                .setColor(EmbedColour.YES.getColour())
+                .build()).queue();
+    }
+
+    @Command(name = "settings.welcome.channel", description = "Changes the channel Titan should send welcome messages to", permission = "command.settings.welcome.channel")
+    public static void changeWelcomeChannel(SlashCommandEvent event) {
 
         new WelcomeSettings(event.getGuild().getId())
                 .setChannelId(event.getOption("channel").getAsGuildChannel().getId())
@@ -67,7 +66,8 @@ public class WelcomeSettingsCommand {
 
     }
 
-    public void changeWelcomeMessage(SlashCommandEvent event) {
+    @Command(name = "settings.welcome.message", description = "The message Titan should send when someone joins (Send without option to get a list of placeholders)", permission = "command.settings.welcome.message")
+    public static void changeWelcomeMessage(SlashCommandEvent event) {
 
         if (event.getOption("message") == null) {
             event.replyEmbeds(new EmbedBuilder()
@@ -94,21 +94,18 @@ public class WelcomeSettingsCommand {
         }
     }
 
-    public void changeWelcomeRole(SlashCommandEvent event) {
-        if (!RoleUtil.isAdmin(event.getMember())) {
-            event.replyEmbeds(PermissionUtil.needAdminEmbed(event).build()).setEphemeral(true).queue();
-            return;
-        }
+    @Command(name = "settings.welcome.role", description = "The role Titan should give to users when they join. Set to @everyone to disable", permission = "command.settings.welcome.role")
+    public static void changeWelcomeRole(SlashCommandEvent event) {
 
         if (!event.getGuild().getSelfMember().canInteract(event.getOption("role").getAsRole())) {
-            event.replyEmbeds(HierarchyError.Embed(event).build()).queue();
+            event.replyEmbeds(HierarchyError.other(event).build()).queue();
             return;
         }
 
         if (event.getOption("role") == null) {
             if (new WelcomeSettings(event.getGuild().getId()).getRoleId() == null) {
                 event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("No welcome role set!")
+                        .setDescription("No welcome role set!")
                         .setColor(EmbedColour.NO.getColour())
                         .build()).queue();
             } else {

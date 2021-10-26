@@ -1,62 +1,49 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
-import me.anutley.titan.database.objects.GuildSettings;
-import me.anutley.titan.util.PermissionUtil;
-import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
-import me.anutley.titan.util.embeds.errors.InsufficientPermissionError;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.exceptions.HierarchyException;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-public class SetNickCommand extends Command {
+public class SetNickCommand {
 
     public static CommandData SetNickCommandData = new CommandData("setnick", "Sets a user's nickname, run this command without the nickname option to reset it")
-            .addOption(OptionType.USER, "user", "The users whose nickname you want to set", true)
+            .addOption(OptionType.USER, "member", "The members' whose nickname you want to set", true)
             .addOption(OptionType.STRING, "nickname", "The nickname that you want to give the user");
 
-    public void onSlashCommand(SlashCommandEvent event) {
-        if (!event.getName().equals("setnick")) return;
+    @Command(name = "setnick", description = "Sets a user's nickname, run this command without the nickname option to reset it", permission = "command.moderation.setnick", selfPermission = Permission.NICKNAME_MANAGE)
+    public static void setNickCommand(SlashCommandEvent event) {
 
-        try {
-            if (!RoleUtil.isStaff(event.getMember())) {
-                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getModRole()).build()).setEphemeral(true).queue();
-                return;
-            }
+        Member member = event.getOption("member").getAsMember();
 
-            event.getOption("user").getAsMember().modifyNickname(
+        if (!event.getGuild().getSelfMember().canInteract(member)) {
+            event.replyEmbeds(HierarchyError.self(event).build()).queue();
+            return;
+        }
+
+        if (!event.getMember().canInteract(member)) {
+            event.replyEmbeds(HierarchyError.other(event).build()).setEphemeral(true).queue();
+            return;
+        }
+
+           member.modifyNickname(
                     event.getOption("nickname") != null ? event.getOption("nickname").getAsString() : null).queue();
 
+        if (event.getOption("nickname") != null) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setDescription(event.getOption("user").getAsUser().getAsMention() + "'s nickname has been changed")
+                    .setDescription(member.getUser().getAsMention() + "'s nickname has been changed to `" + event.getOption("nickname").getAsString() + "`!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
+        } else
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription(member.getUser().getAsMention() + "'s nickname has been reset")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
-        } catch (HierarchyException e) {
-            event.replyEmbeds(HierarchyError.Embed(event).build()).queue();
-        } catch (InsufficientPermissionException exception) {
-            event.replyEmbeds(InsufficientPermissionError.Embed(event, Permission.NICKNAME_MANAGE).build()).setEphemeral(true).queue();
-        }
-    }
-
-    @Override
-    public String getCommandName() {
-        return "setnick";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Sets a user's nickname";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/setnick <user>";
     }
 }

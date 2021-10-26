@@ -11,12 +11,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.TimeFormat;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class RemindCommand extends Command {
+public class RemindCommand {
 
     public static CommandData RemindCommandData = new CommandData("remind", "Manages reminders")
             .addSubcommands(new SubcommandData("add", "Adds a new reminder")
@@ -30,25 +29,15 @@ public class RemindCommand extends Command {
             .addSubcommands(new SubcommandData("remove", "Removes a specific reminder")
                     .addOption(OptionType.INTEGER, "id", "The id of the reminder you want to remove", true));
 
-    @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        if (!event.getName().equals("remind")) return;
-
-        if (Objects.equals(event.getSubcommandName(), "add")) createReminder(event);
-        if (Objects.equals(event.getSubcommandName(), "list")) listReminders(event);
-        if (Objects.equals(event.getSubcommandName(), "info")) getReminderInfo(event);
-        if (Objects.equals(event.getSubcommandName(), "remove")) removeReminder(event);
-
-    }
-
-    public void createReminder(SlashCommandEvent event) {
+    @Command(name = "remind.add", description = "Adds a new reminder", permission = "command.utility.remind.add")
+    public static void createReminder(SlashCommandEvent event) {
 
         if (event.getOption("days") == null
                 && event.getOption("hours") == null
                 && event.getOption("minutes") == null) {
 
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("You need to fill out at least one of the time options!")
+                    .setDescription("You need to fill out at least one of the time options!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).setEphemeral(true).queue();
             return;
@@ -79,7 +68,8 @@ public class RemindCommand extends Command {
 
     }
 
-    public void listReminders(SlashCommandEvent event) {
+    @Command(name = "remind.list", description = "Lists your reminders", permission = "command.utility.remind.list")
+    public static void listReminders(SlashCommandEvent event) {
         ArrayList<Reminder> reminders = ReminderUtil.getUsersReminders(event.getGuild().getId(), event.getMember().getId());
         int count = reminders.size();
         int tagCount = 0;
@@ -114,12 +104,13 @@ public class RemindCommand extends Command {
         }
         if (pageNumber == 0)
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("You have no reminders!")
+                    .setDescription("You have no reminders!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
     }
 
-    public void getReminderInfo(SlashCommandEvent event) {
+    @Command(name = "remind.info", description = "Give info about a specific reminder", permission = "command.utility.remind.info")
+    public static void getReminderInfo(SlashCommandEvent event) {
         Reminder reminder = new Reminder(event.getOption("id").getAsString());
 
         if (!event.getGuild().getId().equals(reminder.getGuildId()) && !event.getUser().getId().equals(reminder.getUserId()))
@@ -137,7 +128,8 @@ public class RemindCommand extends Command {
                 .build()).queue();
     }
 
-    public void removeReminder(SlashCommandEvent event) {
+    @Command(name = "remind.remove", description = "Removes a specific reminder", permission = "command.utility.remind.remove")
+    public static void removeReminder(SlashCommandEvent event) {
 
         ArrayList<Reminder> reminders = ReminderUtil.getUsersReminders(event.getGuild().getId(), event.getUser().getId());
 
@@ -147,34 +139,16 @@ public class RemindCommand extends Command {
 
         if (reminders.stream().anyMatch(r -> Objects.equals(r.getId(), reminder.getId()))) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("Reminder " + reminderId + " has been deleted!")
+                    .setDescription("Reminder " + reminderId + " has been deleted!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
 
             ReminderUtil.removeReminderById(reminderId);
         } else {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("You do not have a reminder in this guild with that ID")
+                    .setDescription("You do not have a reminder in this guild with that ID")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
         }
-    }
-
-    @Override
-    public String getCommandName() {
-        return "remind";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Manages reminders";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/remind add <content> [minutes] [hours] [days]\n" +
-                "/remind list\n" +
-                "/remind info <id>\n" +
-                "/remind remove <id>";
     }
 }

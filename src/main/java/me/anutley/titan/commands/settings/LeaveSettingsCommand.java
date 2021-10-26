@@ -1,5 +1,6 @@
 package me.anutley.titan.commands.settings;
 
+import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.LeaveSettings;
 import me.anutley.titan.util.embeds.errors.NotTextChannelEmbed;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -21,28 +22,33 @@ public class LeaveSettingsCommand {
             .addSubcommands(new SubcommandData("message", "The message Titan should send when someone leaves (Send without option to get the placeholders)")
                     .addOption(OptionType.STRING, "message", "The message Titan should send when someone leaves"));
 
-    public void leaveSettingsCommand(SlashCommandEvent event) {
-        if (event.getSubcommandName().equals("enable")) toggleLeave(event, true);
-        if (event.getSubcommandName().equals("disable")) toggleLeave(event, false);
-        if (event.getSubcommandName().equals("channel")) changeLeaveChannel(event);
-        if (event.getSubcommandName().equals("message")) changeLeaveMessage(event);
+
+    @Command(name = "settings.leave.enable", description = "Enables Titan's leave messages", permission = "command.settings.leave.enable")
+    public static void enableLeave(SlashCommandEvent event) {
+        new LeaveSettings(event.getGuild().getId())
+                .setEnabled(true)
+                .save();
+
+        event.replyEmbeds(new EmbedBuilder()
+                .setDescription("Leave messages has been enabled!")
+                .setColor(EmbedColour.YES.getColour())
+                .build()).queue();
     }
 
-    public void toggleLeave(SlashCommandEvent event, boolean bool) {
+    @Command(name = "settings.leave.disable", description = "Disables Titan's leave messages", permission = "command.settings.leave.disable")
+    public static void disableWelcome(SlashCommandEvent event) {
+        new LeaveSettings(event.getGuild().getId())
+                .setEnabled(false)
+                .save();
 
-        new LeaveSettings(event.getGuild().getId()).setEnabled(bool).save();
-
-        EmbedBuilder builder = new EmbedBuilder();
-        if (bool) builder.setTitle("Leave messages has been enabled!");
-        else builder.setTitle("Leave messages has been disabled!");
-
-        builder.setColor(EmbedColour.YES.getColour());
-
-        event.replyEmbeds(builder.build()).queue();
-
+        event.replyEmbeds(new EmbedBuilder()
+                .setDescription("Leave messages has been disabled!")
+                .setColor(EmbedColour.YES.getColour())
+                .build()).queue();
     }
 
-    public void changeLeaveChannel(SlashCommandEvent event) {
+    @Command(name = "settings.welcome.channel", description = "Changes the channel Titan should send leave messages to", permission = "command.settings.leave.channel")
+    public static void changeLeaveChannel(SlashCommandEvent event) {
 
         if (!event.getOption("channel").getChannelType().equals(ChannelType.TEXT)) {
             event.replyEmbeds(NotTextChannelEmbed.Embed().build()).queue();
@@ -60,7 +66,8 @@ public class LeaveSettingsCommand {
 
     }
 
-    public void changeLeaveMessage(SlashCommandEvent event) {
+    @Command(name = "settings.leave.message", description = "The message Titan should send when someone leaves (Send without option to get a list of placeholders)", permission = "command.settings.leave.channel")
+    public static void changeLeaveMessage(SlashCommandEvent event) {
 
         if (event.getOption("message") == null) {
             event.replyEmbeds(new EmbedBuilder()

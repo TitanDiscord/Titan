@@ -99,7 +99,7 @@ public class WelcomeSettings {
     }
 
     public String getMessage() {
-        return message;
+        return message == null ? "Welcome %user% to %guild_name%" : message;
     }
 
     public String getRoleId() {

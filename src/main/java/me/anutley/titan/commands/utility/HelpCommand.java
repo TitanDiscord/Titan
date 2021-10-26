@@ -1,94 +1,154 @@
 package me.anutley.titan.commands.utility;
 
-import me.anutley.titan.Titan;
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.util.CommandUtil;
+import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.apache.commons.lang.WordUtils;
 
-public class HelpCommand extends Command {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
-    public static CommandData HelpCommandData = new CommandData("help", "Provides you with information about Titan")
-            .addOption(OptionType.STRING, "command", "The command you want to find more information about");
+public class HelpCommand {
 
-    @Override
-    public void onSlashCommand(SlashCommandEvent event) {
+    public static CommandData HelpCommandData = new CommandData("help", "Provides you with information about a command or command category")
+            .addSubcommands(new SubcommandData("command", "Provides you with more information about a command")
+                    .addOption(OptionType.STRING, "command", "The command (format: category.command), for example: fun.avatar, moderation.ban or tag.embed.create "))
+            .addSubcommands(new SubcommandData("category", "Provides you with more information about a category")
+                    .addOption(OptionType.STRING, "category", "The category you want to find more information about"))
+            .addSubcommands(new SubcommandData("all", "Provides you with more information about all Titan's commands"));
 
-        if (!event.getName().equals("help")) return;
+    @Command(name = "help.command", description = "Provides you with more information about a command", permission = "command.utility.help.command")
+    public static void commandHelpCommand(SlashCommandEvent event) {
+        Map<String, Command> commands = new HashMap<>();
 
-        if (event.getOption("command") == null) {
-            StringBuilder content = new StringBuilder();
+        for (Command command : CommandUtil.getCommands())
+            commands.put(command.name(), command);
 
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setTitle("Help");
+        String commandOption = event.getOption("command").getAsString().toLowerCase(Locale.ROOT);
 
-
-            for (int i = 0; i < Titan.getRegisteredCommands().size(); i++) {
-
-                Command command = Titan.getRegisteredCommands().get(i);
-
-                if (i == Titan.getRegisteredCommands().size() - 1) {
-                    content.append("`").append(command.getCommandName()).append("`");
-                } else {
-                    content.append("`").append(command.getCommandName()).append("`, ");
-                }
-            }
-            event.replyEmbeds(
-                    builder.setDescription("Use /help [command] to get more information about a specific command")
-                            .setColor(EmbedColour.NEUTRAL.getColour())
-                            .addField("Commands:", content.toString(), false)
-                            .addField("Arguments", "`<>` are required arguments, whereas `[]` are optional arguments", false)
-                            .build()).queue();
-
-        } else {
-            Command chosenCommand = null;
-
-            for (int i = 0; i < Titan.getRegisteredCommands().size(); i++) {
-                Command currentCommand = Titan.getRegisteredCommands().get(i);
-
-                if (currentCommand.getCommandName().equalsIgnoreCase(event.getOption("command").getAsString())) {
-                    chosenCommand = currentCommand;
-                    break;
-                }
-            }
-
-            if (chosenCommand == null) {
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("No command found with the name `" + event.getOption("command").getAsString() + "`")
-                        .setColor(EmbedColour.NO.getColour())
-                        .build()).queue();
-            }
-            else {
-                EmbedBuilder builder = new EmbedBuilder();
-
-                builder
-                        .setTitle("Command Name: `" + chosenCommand.getCommandName() + "`")
-                        .setColor(EmbedColour.YES.getColour())
-                        .addField("Description:", chosenCommand.getCommandDescription(), false)
-                        .addField("Usage:", chosenCommand.getCommandUsage(), false);
-
-                event.replyEmbeds(builder.build()).queue();
-
-            }
-
+        if (!commands.containsKey(commandOption)) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("`" + commandOption + "`" + " is not a valid command!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
         }
 
+        event.replyEmbeds(
+                new EmbedBuilder()
+                        .setTitle("Command Name: `" + commandOption + "`")
+                        .setColor(EmbedColour.NEUTRAL.getColour())
+                        .addField("Description:", commands.get(commandOption).description(), false)
+                        .addField("Permission:", commands.get(commandOption).permission(), false)
+                        .addField("Has Permission:",
+                                PermissionUtil.hasPermission(commands.get(commandOption).permission(), event.getMember())
+                                        ? "✅" : "❌", false)
+                        .build()).queue();
     }
 
-    @Override
-    public String getCommandName() {
-        return "help";
+    @Command(name = "help.category", description = "PProvides you with more information about a category", permission = "command.utility.help.category")
+    public static void categoryHelpCommand(SlashCommandEvent event) {
+        String category = event.getOption("category").getAsString().toLowerCase(Locale.ROOT);
+
+        if (!CommandUtil.isValidCategory(category)) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("`" + category + "` is not a valid category!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
+
+        ArrayList<Command> commands = CommandUtil.getCommandsByCategory(category);
+        int count = commands.size();
+        int commandCount = 0;
+        int pageNumber = 0;
+
+        for (int i = 0; i < count; i += 25) {
+
+            pageNumber++;
+            EmbedBuilder builder = new EmbedBuilder();
+
+            if (pageNumber == 1)
+                builder.setTitle(WordUtils.capitalize(category) + " Commands")
+                        .setDescription("To find out more about a specific command run `/help command <command>`")
+                        .setColor(EmbedColour.NEUTRAL.getColour());
+
+            for (int j = 0; j < 25; j++) {
+                if (commandCount >= count) break;
+
+                Command command = commands.get(commandCount);
+
+                builder.addField(command.name(), "`Description:` " + command.description() + "\n`Permission:` " + command.permission(), true);
+                commandCount++;
+            }
+
+            if (pageNumber == 1)
+                event.replyEmbeds(builder.build()).queue();
+            else
+                event.getChannel().sendMessageEmbeds(builder.build()).queue();
+
+        }
     }
 
-    @Override
-    public String getCommandDescription() {
-        return "Provides you with information about Titan";
+    @Command(name = "help.all", description = "Provides you with more information about all Titan's commands", permission = "command.utility.help.all")
+    public static void allHelpCommand(SlashCommandEvent event) {
+
+        StringBuilder funCommands = new StringBuilder();
+        StringBuilder moderationCommands = new StringBuilder();
+        StringBuilder permissionCommands = new StringBuilder();
+        StringBuilder settingsCommands = new StringBuilder();
+        StringBuilder utilityCommands = new StringBuilder();
+
+
+        for (Command command : CommandUtil.getBaseCommandsByCategory("fun"))
+            funCommands.append(addCommand(command.name())).append("\n");
+
+        for (Command command : CommandUtil.getBaseCommandsByCategory("moderation"))
+            moderationCommands.append(addCommand(command.name())).append("\n");
+
+        for (Command command : CommandUtil.getBaseCommandsByCategory("permission"))
+            permissionCommands.append(addCommand(command.name())).append("\n");
+
+        for (Command command : CommandUtil.getBaseCommandsByCategory("settings"))
+            settingsCommands.append(addCommand(command.name())).append("\n");
+
+        for (Command command : CommandUtil.getBaseCommandsByCategory("utility"))
+            utilityCommands.append(addCommand(command.name())).append("\n");
+
+
+        event.replyEmbeds(new EmbedBuilder()
+                .setTitle("All Commands!")
+                .setDescription("To find out more about a specific category run `/help category <category>`")
+                .setColor(EmbedColour.NEUTRAL.getColour())
+                .addField("Fun Commands:", funCommands.toString(), true)
+                .addField("Moderation Commands:", moderationCommands.toString(), true)
+                .addField("Permission Commands:", permissionCommands.toString(), true)
+                .addField("Settings Commands:", settingsCommands.toString(), true)
+                .addField("Utility Commands:", utilityCommands.toString(), true)
+                .build()).queue();
     }
 
-    @Override
-    public String getCommandUsage() {
-        return "/help [command]";
+    public static String addCommand(String commandName) {
+        String[] command = commandName.split("\\.");
+        if (command.length == 1) {
+            return command[0];
+        }
+
+        if (command.length == 2) {
+            return command[0];
+        }
+
+        if (command.length == 3) {
+            return command[1];
+        }
+        return null;
     }
 }

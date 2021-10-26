@@ -1,11 +1,8 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
-import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.database.objects.Warning;
 import me.anutley.titan.database.util.WarnUtil;
-import me.anutley.titan.util.PermissionUtil;
-import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
@@ -14,12 +11,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.TimeFormat;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class WarnCommand extends Command {
+public class WarnCommand {
 
     public static CommandData WarnCommandData = new CommandData("warn", "Warn base command")
             .addSubcommands(new SubcommandData("add", "Warns a user")
@@ -33,26 +29,9 @@ public class WarnCommand extends Command {
             .addSubcommands(new SubcommandData("clear", "Clears all warns from a user")
                     .addOption(OptionType.USER, "user", "The user whose warns you want to clear", true));
 
-    @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent event) {
 
-        if (!event.getName().equals("warn")) return;
-
-        if (!RoleUtil.isStaff(event.getMember())) {
-            if (!event.getSubcommandName().equals("list")) {
-                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getModRole()).build()).setEphemeral(true).queue();
-                return;
-            }
-        }
-
-        if (event.getSubcommandName().equals("add")) addWarn(event);
-        if (event.getSubcommandName().equals("remove")) removeWarn(event);
-        if (event.getSubcommandName().equals("clear")) clearWarns(event);
-        if (event.getSubcommandName().equals("list")) listWarns(event);
-
-    }
-
-    public void addWarn(SlashCommandEvent event) {
+    @Command(name = "warn.add", description = "Warns a user", permission = "command.moderation.warn.add")
+    public static void addWarn(SlashCommandEvent event) {
 
         String reason = event.getOption("reason").getAsString();
         boolean trimmed = false;
@@ -77,7 +56,8 @@ public class WarnCommand extends Command {
 
     }
 
-    public void listWarns(SlashCommandEvent event) {
+    @Command(name = "warn.list", description = "Lists all the warnings of a user", permission = "command.moderation.warn.list")
+    public static void listWarns(SlashCommandEvent event) {
 
         User user = event.getOption("user").getAsUser();
         ArrayList<Warning> warnings = WarnUtil.getUsersWarnings(event.getGuild().getId(), user.getId());
@@ -114,13 +94,14 @@ public class WarnCommand extends Command {
         }
         if (pageNumber == 0)
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("They have no warnings!")
+                    .setDescription(user.getAsMention() + " has no warnings!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
 
     }
 
-    public void removeWarn(SlashCommandEvent event) {
+    @Command(name = "warn.remove", description = "Removes a warn from a user by its punishment id", permission = "command.moderation.warn.remove")
+    public static void removeWarn(SlashCommandEvent event) {
 
         String id = event.getOption("id").getAsString();
         User user = event.getOption("user").getAsUser();
@@ -131,7 +112,7 @@ public class WarnCommand extends Command {
 
         if (warnings.stream().anyMatch(w -> Objects.equals(w.getId(), warning.getId()))) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("Warning (" + event.getOption("id").getAsString() + ") has been deleted!")
+                    .setDescription("Warning (`" + event.getOption("id").getAsString() + "`) for " + user.getAsMention() + " has been deleted!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
             WarnUtil.removeWarningById(id);
@@ -146,7 +127,8 @@ public class WarnCommand extends Command {
 
     }
 
-    public void clearWarns(SlashCommandEvent event) {
+    @Command(name = "warn.clear", description = "Clears all warns from a user", permission = "command.moderation.warn.clear")
+    public static void clearWarns(SlashCommandEvent event) {
 
         User user = event.getOption("user").getAsUser();
 
@@ -168,21 +150,4 @@ public class WarnCommand extends Command {
         }
     }
 
-    @Override
-    public String getCommandName() {
-        return "warn";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Controls Titan's warn functionality";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/warn add <user> <reason>" +
-                "\n/warn remove <user> " +
-                "\n/warn list <user>" +
-                "\n/warn clear <user>";
-    }
 }

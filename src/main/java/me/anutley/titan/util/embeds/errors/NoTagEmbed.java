@@ -8,7 +8,7 @@ public class NoTagEmbed {
 
         EmbedBuilder builder = new EmbedBuilder();
 
-        return builder.setTitle("This tag does not exist!")
+        return builder.setDescription("This tag does not exist!")
                 .setColor(EmbedColour.NO.getColour());
     }
 }

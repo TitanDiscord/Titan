@@ -7,13 +7,12 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
-public class GuildInfoCommand extends Command {
+public class GuildInfoCommand {
 
     public static CommandData GuildInfoCommandData = new CommandData("guildinfo", "Gives information about the current guild");
 
-    @Override
-    public void onSlashCommand(SlashCommandEvent event) {
-        if (!event.getName().equals("guildinfo")) return;
+    @Command(name = "guildinfo", description = "Gives information about the current guild", permission = "command.utility.guildinfo")
+    public static void guildInfoCommand(SlashCommandEvent event) {
 
         event.getGuild().loadMembers();
 
@@ -42,21 +41,5 @@ public class GuildInfoCommand extends Command {
 
         event.replyEmbeds(builder.build()).queue();
 
-    }
-
-
-    @Override
-    public String getCommandName() {
-        return "guildinfo";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Gives information about the current guild";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/guildinfo";
     }
 }

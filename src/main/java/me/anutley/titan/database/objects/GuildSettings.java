@@ -12,9 +12,6 @@ import java.sql.SQLException;
 public class GuildSettings {
 
     private String guildId;
-    private String adminRoleId;
-    private String modRoleId;
-    private String tagManagementRoleId;
     private String muteRoleId;
     private boolean lockdown;
     private boolean autoQuote;
@@ -33,9 +30,6 @@ public class GuildSettings {
             if (result.next())
                 this
                         .setGuildId(guildId)
-                        .setAdminRoleId(result.getString("guild_admin_role"))
-                        .setModRoleId(result.getString("guild_mod_role"))
-                        .setTagManagementRoleId(result.getString("tag_management_role"))
                         .setMuteRoleId(result.getString("mute_role"))
                         .setLockdown(result.getBoolean("lockdown"))
                         .setAutoQuote(result.getBoolean("auto_quote"));
@@ -63,28 +57,22 @@ public class GuildSettings {
                 if (this.getGuildId() == null) return this;
 
                 PreparedStatement newGuildSettings = connection
-                        .prepareStatement("INSERT INTO guild_settings (guild_id, guild_admin_role, guild_mod_role, tag_management_role, mute_role, lockdown, auto_quote) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO guild_settings (guild_id, mute_role, lockdown, auto_quote) VALUES (?, ?, ?, ?)");
 
                 newGuildSettings.setString(1, this.getGuildId());
-                newGuildSettings.setString(2, this.getAdminRoleId());
-                newGuildSettings.setString(3, this.getModRoleId());
-                newGuildSettings.setString(4, this.getTagManagementRoleId());
-                newGuildSettings.setString(5, this.getMuteRoleId());
-                newGuildSettings.setBoolean(6, this.isLockdown());
-                newGuildSettings.setBoolean(7, this.isAutoQuote());
+                newGuildSettings.setString(2, this.getMuteRoleId());
+                newGuildSettings.setBoolean(3, this.isLockdown());
+                newGuildSettings.setBoolean(4, this.isAutoQuote());
                 newGuildSettings.executeUpdate();
             } else {
 
                 PreparedStatement editGuildSettings = connection
-                        .prepareStatement("UPDATE guild_settings set guild_admin_role = ?, guild_mod_role = ?, tag_management_role = ?, mute_role = ?, lockdown = ?, auto_quote = ? where guild_id = ?");
+                        .prepareStatement("UPDATE guild_settings set mute_role = ?, lockdown = ?, auto_quote = ? where guild_id = ?");
 
-                editGuildSettings.setString(1, this.getAdminRoleId());
-                editGuildSettings.setString(2, this.getModRoleId());
-                editGuildSettings.setString(3, this.getTagManagementRoleId());
-                editGuildSettings.setString(4, this.getMuteRoleId());
-                editGuildSettings.setBoolean(5, this.isLockdown());
-                editGuildSettings.setBoolean(6, this.isAutoQuote());
-                editGuildSettings.setString(7, this.getGuildId());
+                editGuildSettings.setString(1, this.getMuteRoleId());
+                editGuildSettings.setBoolean(2, this.isLockdown());
+                editGuildSettings.setBoolean(3, this.isAutoQuote());
+                editGuildSettings.setString(4, this.getGuildId());
 
                 editGuildSettings.executeUpdate();
             }
@@ -97,30 +85,6 @@ public class GuildSettings {
 
     public String getGuildId() {
         return guildId;
-    }
-
-    public String getAdminRoleId() {
-        return adminRoleId;
-    }
-
-    public Role getAdminRole() {
-        return Titan.getJda().getRoleById(adminRoleId);
-    }
-
-    public String getModRoleId() {
-        return modRoleId;
-    }
-
-    public Role getModRole() {
-        return Titan.getJda().getRoleById(modRoleId);
-    }
-
-    public String getTagManagementRoleId() {
-        return tagManagementRoleId;
-    }
-
-    public Role getTagManagementRole() {
-        return Titan.getJda().getRoleById(tagManagementRoleId);
     }
 
     public String getMuteRoleId() {
@@ -142,21 +106,6 @@ public class GuildSettings {
 
     public GuildSettings setGuildId(String guildId) {
         this.guildId = guildId;
-        return this;
-    }
-
-    public GuildSettings setAdminRoleId(String adminRoleId) {
-        this.adminRoleId = adminRoleId;
-        return this;
-    }
-
-    public GuildSettings setModRoleId(String modRoleId) {
-        this.modRoleId = modRoleId;
-        return this;
-    }
-
-    public GuildSettings setTagManagementRoleId(String tagManagementRoleId) {
-        this.tagManagementRoleId = tagManagementRoleId;
         return this;
     }
 

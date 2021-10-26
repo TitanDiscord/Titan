@@ -1,20 +1,15 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
-import me.anutley.titan.database.objects.GuildSettings;
-import me.anutley.titan.util.PermissionUtil;
-import me.anutley.titan.util.RoleUtil;
-import me.anutley.titan.util.embeds.errors.InsufficientPermissionError;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-public class SlowmodeCommand extends Command {
+public class SlowmodeCommand {
 
     public static CommandData SlowmodeCommandData = new CommandData("slowmode", "Sets the slowmode for either the current or a specified channel (Set to 0 to reset, max 6 hours)")
             .addOption(OptionType.INTEGER, "hours", "How many hours between messages")
@@ -22,13 +17,9 @@ public class SlowmodeCommand extends Command {
             .addOption(OptionType.INTEGER, "seconds", "How many seconds between messages")
             .addOption(OptionType.CHANNEL, "channel", "The text channel to apply the slowmode to (Will use current channel if none are specified)");
 
-    public void onSlashCommand(SlashCommandEvent event) {
+    @Command(name = "slowmode", description = "Sets the slowmode for either the current or a specified channel (Set to 0 to reset, max 6 hours)", permission = "command.moderation.slowmode", selfPermission = Permission.MANAGE_CHANNEL)
+    public static void slowmodeCommand(SlashCommandEvent event) {
         if (!event.getName().equals("slowmode")) return;
-
-        if (!RoleUtil.isStaff(event.getMember())) {
-            event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getModRole()).build()).queue();
-            return;
-        }
 
         long hours = 0;
         long minutes = 0;
@@ -49,7 +40,7 @@ public class SlowmodeCommand extends Command {
 
         if (total > 21600) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("The maximum slowmode you can set is 1 message every 6 hours")
+                    .setDescription("The maximum slowmode you can set is 1 message every 6 hours")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
         } else {
@@ -61,34 +52,14 @@ public class SlowmodeCommand extends Command {
             if (minutes != 0) formattedTime += minutes + "m ";
             if (seconds != 0) formattedTime += seconds + "s";
 
-            try {
-                if (channel == null) event.getTextChannel().getManager().setSlowmode((int) total).queue();
-                else event.getGuild().getTextChannelById(channel.getId()).getManager().setSlowmode((int) total).queue();
+            if (channel == null) event.getTextChannel().getManager().setSlowmode((int) total).queue();
+            else event.getGuild().getTextChannelById(channel.getId()).getManager().setSlowmode((int) total).queue();
 
 
-                if (total == 0) event.replyEmbeds(builder.setTitle("Slowmode has been disabled!").build()).queue();
-                else
-                    event.replyEmbeds(builder.setTitle("The slowmode has been set to one message every `" + formattedTime.trim() + "`").build()).queue();
+            if (total == 0) event.replyEmbeds(builder.setDescription("Slowmode has been disabled!").build()).queue();
+            else
+                event.replyEmbeds(builder.setDescription("The slowmode has been set to one message every `" + formattedTime.trim() + "`").build()).queue();
 
-            } catch (InsufficientPermissionException exception) {
-                event.replyEmbeds(InsufficientPermissionError.Embed(event, Permission.MANAGE_CHANNEL).build()).setEphemeral(true).queue();
-            }
         }
-
-    }
-
-    @Override
-    public String getCommandName() {
-        return "slowmode";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Sets the slowmode for either the current or a specified channel (Set to 0 to reset, max 6 hours)";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/slowmode <time> [channel]";
     }
 }

@@ -9,14 +9,13 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.utils.TimeFormat;
 
-public class UserInfoCommand extends Command {
+public class UserInfoCommand {
 
     public static CommandData UserInfoCommandData = new CommandData("userinfo", "Gets information about a user")
             .addOption(OptionType.USER, "user", "The user to get the info from. Leave blank to get information about yourself");
 
-    @Override
-    public void onSlashCommand(SlashCommandEvent event) {
-
+    @Command(name = "userinfo", description = "Gets information about a user", permission = "command.utility.userinfo")
+    public static void userInfoCommand(SlashCommandEvent event) {
         Member member;
 
         if (!event.getName().equals("userinfo")) return;
@@ -43,20 +42,5 @@ public class UserInfoCommand extends Command {
                 .addField("Is Boosting", String.valueOf(boosting).replace("f", "F").replace("t", "T"), true)
                 .build()).queue();
 
-    }
-
-    @Override
-    public String getCommandName() {
-        return "userinfo";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Gets information about a user";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/userinfo [user]";
     }
 }

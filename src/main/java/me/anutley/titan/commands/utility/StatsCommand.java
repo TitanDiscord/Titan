@@ -7,14 +7,12 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-public class StatsCommand extends Command {
+public class StatsCommand {
 
-    public static CommandData StatsCommandData = new CommandData("stats", "Shows the bots stats");
+    public static CommandData StatsCommandData = new CommandData("stats", "Shows some statistics about Titan");
 
-    private int amountOfPeopleInEachGuild;
-
-    @Override
-    public void onSlashCommand(SlashCommandEvent event) {
+    @Command(name = "stats", description = "Shows some statistics about Titan", permission = "command.utility.stats")
+    public static void statsCommand(SlashCommandEvent event) {
 
         if (!event.getName().equals("stats")) return;
 
@@ -31,27 +29,12 @@ public class StatsCommand extends Command {
 
     }
 
-    private int amountOfMembersInTotalGuild(SlashCommandEvent event) {
+    private static int amountOfMembersInTotalGuild(SlashCommandEvent event) {
+        int amountOfPeopleInEachGuild = 0;
         for (Guild guild : event.getJDA().getGuilds()) {
             amountOfPeopleInEachGuild += guild.getMemberCount();
         }
-
         return amountOfPeopleInEachGuild;
-    }
-
-    @Override
-    public String getCommandName() {
-        return "stats";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Sends stats about Titan";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/stats";
     }
 }
 

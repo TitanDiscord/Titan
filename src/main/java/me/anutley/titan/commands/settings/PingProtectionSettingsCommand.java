@@ -1,5 +1,6 @@
 package me.anutley.titan.commands.settings;
 
+import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.PingProtectionSettings;
 import me.anutley.titan.database.objects.PingProtectionUserData;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -30,45 +31,47 @@ public class PingProtectionSettingsCommand {
                     .addOption(OptionType.STRING, "action", "Possible options: warn, kick, ban", true));
 
 
-    public void pingProtectionSettingsCommand(SlashCommandEvent event) {
-        if (event.getSubcommandName().equals("enable")) togglePingProtection(event, true);
-        if (event.getSubcommandName().equals("disable")) togglePingProtection(event, false);
-        if (event.getSubcommandName().equals("threshold")) modifyPingThreshold(event);
-        if (event.getSubcommandName().equals("add")) toggleRolePingProtection(event, true);
-        if (event.getSubcommandName().equals("remove")) toggleRolePingProtection(event, false);
-        if (event.getSubcommandName().equals("resetpings")) resetIllegalPings(event);
-        if (event.getSubcommandName().equals("action")) changeActionWhenPingsSurpassThreshold(event);
-        if (event.getSubcommandName().equals("list")) listPingProtectedRoles(event);
-    }
-
-    public void togglePingProtection(SlashCommandEvent event, boolean bool) {
+    @Command(name = "settings.pingprotection.enable", description = "Enables ping protection for this guild", permission = "command.settings.pingprotection.enable")
+    public static void enablePingProtection(SlashCommandEvent event) {
 
         new PingProtectionSettings(event.getGuild().getId())
-                .setEnabled(bool)
+                .setEnabled(true)
                 .save();
 
-        EmbedBuilder builder = new EmbedBuilder();
-        if (bool) builder.setTitle("Ping protection has been enabled!");
-        else builder.setTitle("Ping protection has been disabled!");
-
-        builder.setColor(EmbedColour.YES.getColour());
-
-        event.replyEmbeds(builder.build()).queue();
+        event.replyEmbeds(new EmbedBuilder()
+                .setColor(EmbedColour.YES.getColour())
+                .setDescription("Ping protection has been enabled!")
+                .build()).queue();
     }
 
-    public void modifyPingThreshold(SlashCommandEvent event) {
+    @Command(name = "settings.pingprotection.disable", description = "Disables ping protection for this guild", permission = "command.settings.pingprotection.disable")
+    public static void disablePingProtection(SlashCommandEvent event) {
+
+        new PingProtectionSettings(event.getGuild().getId())
+                .setEnabled(false)
+                .save();
+
+        event.replyEmbeds(new EmbedBuilder()
+                .setColor(EmbedColour.YES.getColour())
+                .setDescription("Ping protection has been disabled!")
+                .build()).queue();
+    }
+
+    @Command(name = "settings.pingprotection.threshold", description = "Modifies the threshold of illegal pings someone can make before an action of your choice is taken", permission = "command.settings.pingprotection.threshold")
+    public static void modifyPingThreshold(SlashCommandEvent event) {
 
         new PingProtectionSettings(event.getGuild().getId())
                 .setThreshold(Integer.parseInt(event.getOption("amount").getAsString()))
                 .save();
 
         event.replyEmbeds(new EmbedBuilder()
-                .setTitle("The ping protection threshold has been set to " + event.getOption("amount").getAsString())
+                .setDescription("The ping protection threshold has been set to " + event.getOption("amount").getAsString())
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
     }
 
-    public void toggleRolePingProtection(SlashCommandEvent event, boolean bool) {
+    @Command(name = "settings.pingprotection.add", description = "Adds a role to the ping protection", permission = "command.settings.pingprotection.add")
+    public static void addRolePingProtection(SlashCommandEvent event) {
 
         PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
         ArrayList<String> pingProtectedRoles = new ArrayList<>();
@@ -80,71 +83,83 @@ public class PingProtectionSettingsCommand {
                     .replaceAll("]", "")
                     .split(",")));
 
-            if (bool) {
-                if (pingProtectionSettings.getRoles().contains(event.getOption("role").getAsRole().getId())) {
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setTitle("This role is already protected from pings!")
-                            .setColor(EmbedColour.NO.getColour())
-                            .build()).queue();
-                    return;
-                }
-
+            if (pingProtectionSettings.getRoles().contains(event.getOption("role").getAsRole().getId())) {
                 event.replyEmbeds(new EmbedBuilder()
-                        .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-
-                pingProtectedRolesAsArrayList.add(event.getOption("role").getAsRole().getId());
-            }
-
-            if (!bool) {
-                if (!pingProtectionSettings.getRoles().contains(event.getOption("role").getAsRole().getId())) {
-                    event.replyEmbeds(new EmbedBuilder()
-                            .setTitle("This role is not currently protected from pings!")
-                            .setColor(EmbedColour.NO.getColour())
-                            .build()).queue();
-                    return;
-                }
-
-                event.replyEmbeds(new EmbedBuilder()
-                        .setDescription(event.getOption("role").getAsRole().getAsMention() + " is no longer protected from pings!")
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-
-                pingProtectedRolesAsArrayList.remove(event.getOption("role").getAsRole().getId());
-
-
-            }
-            pingProtectedRoles = pingProtectedRolesAsArrayList;
-
-        } else {
-            if (!bool) {
-                event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("This role is not protected from pings!")
+                        .setDescription("This role is already protected from pings!")
                         .setColor(EmbedColour.NO.getColour())
                         .build()).queue();
                 return;
-            } else {
-                pingProtectedRoles.add(event.getOption("role").getAsRole().getId());
-
-                event.replyEmbeds(new EmbedBuilder()
-                        .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
-                        .setColor(EmbedColour.YES.getColour())
-                        .build()).queue();
-
             }
+
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
+
+            pingProtectedRolesAsArrayList.add(event.getOption("role").getAsRole().getId());
+
+            pingProtectedRoles = pingProtectedRolesAsArrayList;
+
+        } else {
+            pingProtectedRoles.add(event.getOption("role").getAsRole().getId());
+
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription(event.getOption("role").getAsRole().getAsMention() + " is now protected from pings!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
+
         }
         pingProtectionSettings.setRoles(pingProtectedRoles).save();
     }
 
+    @Command(name = "settings.pingprotection.remove", description = "Removes a role from the ping protection", permission = "command.settings.pingprotection.remove")
+    public static void removeRolePingProtection(SlashCommandEvent event) {
 
-    public void listPingProtectedRoles(SlashCommandEvent event) {
+        PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
+        ArrayList<String> pingProtectedRoles = new ArrayList<>();
+
+        if (pingProtectionSettings.getRoles() != null) {
+
+            ArrayList<String> pingProtectedRolesAsArrayList = new ArrayList<>(Arrays.asList(pingProtectionSettings.getRoles().toString()
+                    .replaceAll("\\[", "")
+                    .replaceAll("]", "")
+                    .split(",")));
+
+            if (!pingProtectionSettings.getRoles().contains(event.getOption("role").getAsRole().getId())) {
+                event.replyEmbeds(new EmbedBuilder()
+                        .setDescription("This role is not currently protected from pings!")
+                        .setColor(EmbedColour.NO.getColour())
+                        .build()).queue();
+                return;
+            }
+
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription(event.getOption("role").getAsRole().getAsMention() + " is no longer protected from pings!")
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
+
+            pingProtectedRolesAsArrayList.remove(event.getOption("role").getAsRole().getId());
+
+
+            pingProtectedRoles = pingProtectedRolesAsArrayList;
+
+        } else {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("This role is not protected from pings!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).queue();
+        }
+        pingProtectionSettings.setRoles(pingProtectedRoles).save();
+    }
+
+    @Command(name = "settings.pingprotection.list", description = "Lists all the roles that are protected from pings", permission = "command.settings.pingprotection.list")
+    public static void listPingProtectedRoles(SlashCommandEvent event) {
 
         PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
 
         if (pingProtectionSettings.getRoles() == null) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("There are no ping protected roles!")
+                    .setDescription("There are no ping protected roles!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
             return;
@@ -165,26 +180,28 @@ public class PingProtectionSettingsCommand {
         event.replyEmbeds(builder.build()).queue();
     }
 
-    public void resetIllegalPings(SlashCommandEvent event) {
+    @Command(name = "settings.pingprotection.reset", description = "Resets a members illegal ping count", permission = "command.settings.pingprotection.reset")
+    public static void resetIllegalPings(SlashCommandEvent event) {
 
         new PingProtectionUserData(event.getGuild().getId(), event.getOption("member").getAsUser().getId())
                 .setCount(0)
                 .save();
 
-            event.replyEmbeds(new EmbedBuilder()
-                    .setDescription(event.getOption("member").getAsUser().getAsMention() + "'s pings have been reset!")
-                    .setColor(EmbedColour.YES.getColour())
-                    .build()).queue();
+        event.replyEmbeds(new EmbedBuilder()
+                .setDescription(event.getOption("member").getAsUser().getAsMention() + "'s pings have been reset!")
+                .setColor(EmbedColour.YES.getColour())
+                .build()).queue();
     }
 
-    public void changeActionWhenPingsSurpassThreshold(SlashCommandEvent event) {
+    @Command(name = "settings.pingprotection.action", description = "Changes the action that Titan will take when someone surpasses the illegal ping threshold", permission = "command.settings.pingprotection.action")
+    public static void changeActionWhenPingsSurpassThreshold(SlashCommandEvent event) {
 
         if (!event.getOption("action").getAsString().equals("warn") &&
                 !event.getOption("action").getAsString().equals("kick") &&
                 !event.getOption("action").getAsString().equals("ban")) {
 
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("That is not a valid option. You can choose between: warn, kick or ban!")
+                    .setDescription("That is not a valid option. You can choose between: warn, kick or ban!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
         } else {
@@ -194,7 +211,7 @@ public class PingProtectionSettingsCommand {
                     .save();
 
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("The action when someone surpasses the illegal ping threshold has been set to `" + event.getOption("action").getAsString() + "`!")
+                    .setDescription("The action when someone surpasses the illegal ping threshold has been set to `" + event.getOption("action").getAsString() + "`!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
