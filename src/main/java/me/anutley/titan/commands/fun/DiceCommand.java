@@ -3,18 +3,15 @@ package me.anutley.titan.commands.fun;
 import me.anutley.titan.commands.Command;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class DiceCommand extends Command {
+public class DiceCommand {
 
-    public static CommandData DiceCommandData = new CommandData("dice", "Rolls a dice");
+    public static CommandData DiceCommandData = new CommandData("dice", "Rolls a die");
 
-    @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        if (!event.getName().equals("dice")) return;
-
+    @Command(name = "dice", description = "Rolls a dice", permission = "command.fun.dice")
+    public static void diceCommand(SlashCommandEvent event) {
         int num = ThreadLocalRandom.current().nextInt(1, 7);
 
         if (num == 1) event.reply("1️⃣").queue();
@@ -25,19 +22,4 @@ public class DiceCommand extends Command {
         if (num == 6) event.reply("6️⃣").queue();
     }
 
-
-    @Override
-    public String getCommandName() {
-        return "dice";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Rolls a dice";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/dice";
-    }
 }

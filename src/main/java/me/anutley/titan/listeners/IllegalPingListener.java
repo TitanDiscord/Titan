@@ -65,7 +65,7 @@ public class IllegalPingListener extends ListenerAdapter {
                 pingProtectionUserData.setCount(ping).save();
 
                 EmbedBuilder builder = new EmbedBuilder()
-                        .setTitle("Please don't ping members with ping protected roles")
+                        .setDescription("Please don't ping members with ping protected roles")
                         .setColor(EmbedColour.NO.getColour());
 
                 if (ping == (threshold - 1))
@@ -85,7 +85,7 @@ public class IllegalPingListener extends ListenerAdapter {
                 "ed";
 
         event.getMessage().replyEmbeds(new EmbedBuilder()
-                .setTitle(event.getMember().getUser().getAsTag() + " has been " + action + " for bypassing the illegal ping threshold!")
+                .setDescription(event.getMember().getUser().getAsTag() + " has been " + action + " for bypassing the illegal ping threshold!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
 

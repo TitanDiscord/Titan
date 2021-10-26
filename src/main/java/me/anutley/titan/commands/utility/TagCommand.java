@@ -2,29 +2,26 @@ package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.EmbedTag;
-import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.database.objects.TextTag;
 import me.anutley.titan.database.util.TagUtil;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.RegexUtil;
-import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.embeds.errors.NoTagEmbed;
 import me.anutley.titan.util.enums.EmbedColour;
 import me.anutley.titan.util.exceptions.NoTagFoundException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
 import net.dv8tion.jda.api.interactions.components.Button;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
-public class TagCommand extends Command {
+public class TagCommand extends ListenerAdapter {
 
     public static CommandData TagCommandData = new CommandData("tag", "Allows the managing / using of tags")
             .addSubcommandGroups(new SubcommandGroupData("embed", "Managing of embedded tags")
@@ -61,42 +58,10 @@ public class TagCommand extends Command {
 
             .addSubcommands(new SubcommandData("clear", "Clears ALL of this guild's tags. This action is irreversible"))
 
-            .addSubcommands(new SubcommandData("list", "Lists all of the guild's tags"))
+            .addSubcommands(new SubcommandData("list", "Lists all of the guild's tags"));
 
-            .addSubcommands(new SubcommandData("setrole", "Sets the role that can manage tags in this guild")
-                    .addOption(OptionType.ROLE, "role", "The role you want to have control over tags"));
 
-    @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        if (!event.getName().equals("tag")) return;
-
-        if (!RoleUtil.isTagManager(event.getMember())) {
-            if (!Objects.equals(event.getSubcommandName(), "get") || !event.getSubcommandName().equals("list")) {
-                event.replyEmbeds(PermissionUtil.needRoleEmbed(event, new GuildSettings(event.getGuild().getId()).getTagManagementRole()).build()).setEphemeral(true).queue();
-                return;
-            }
-        }
-
-        if (Objects.equals(event.getSubcommandGroup(), "embed")) {
-            if (Objects.equals(event.getSubcommandName(), "create")) createEmbedTag(event);
-            if (Objects.equals(event.getSubcommandName(), "edit")) editEmbedTag(event);
-        }
-
-        if (Objects.equals(event.getSubcommandGroup(), "text")) {
-            if (Objects.equals(event.getSubcommandName(), "create")) createTextTag(event);
-            if (Objects.equals(event.getSubcommandName(), "edit")) editTextTag(event);
-        }
-
-        if (event.getSubcommandGroup() == null) {
-            if (Objects.equals(event.getSubcommandName(), "get")) getTag(event);
-            if (Objects.equals(event.getSubcommandName(), "delete")) deleteTag(event);
-            if (Objects.equals(event.getSubcommandName(), "clear")) clearTags(event);
-            if (Objects.equals(event.getSubcommandName(), "list")) listTags(event);
-            if (Objects.equals(event.getSubcommandName(), "setrole")) modifyTagPermissions(event);
-        }
-
-    }
-
+    @Command(name = "tag.embed.create", description = "Creates an embedded tag", permission = "command.utility.tag.embed.create")
     public void createEmbedTag(SlashCommandEvent event) {
 
         String trigger = event.getOption("trigger").getAsString();
@@ -104,7 +69,7 @@ public class TagCommand extends Command {
 
         if (TagUtil.doesTagExist(trigger, guildId)) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("This tag already exists!")
+                    .setDescription("This tag already exists!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).setEphemeral(true).queue();
         } else {
@@ -126,13 +91,14 @@ public class TagCommand extends Command {
         }
     }
 
+    @Command(name = "tag.embed.edit", description = "Edits an embedded tag", permission = "command.utility.tag.embed.edit")
     public void editEmbedTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
         try {
             if (!TagUtil.isEmbedTag(trigger, guildId)) {
-                event.replyEmbeds(notCorrectTagTypeEmbed("embed", "text").build()).queue();
+                event.replyEmbeds(notCorrectTagTypeEmbed("embed", "text").build()).setEphemeral(true).queue();
                 return;
             }
 
@@ -162,14 +128,14 @@ public class TagCommand extends Command {
 
     }
 
-
+    @Command(name = "tag.text.create", description = "Creates a text tag", permission = "command.utility.tag.text.create")
     public void createTextTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
         if (TagUtil.doesTagExist(trigger, guildId)) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("This tag already exists!")
+                    .setDescription("This tag already exists!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).setEphemeral(true).queue();
         } else {
@@ -189,13 +155,14 @@ public class TagCommand extends Command {
         }
     }
 
+    @Command(name = "tag.text.edit", description = "Edits a text tag", permission = "command.utility.tag.text.edit")
     public void editTextTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
         try {
             if (TagUtil.isEmbedTag(trigger, guildId)) {
-                event.replyEmbeds(notCorrectTagTypeEmbed("text", "embed").build()).queue();
+                event.replyEmbeds(notCorrectTagTypeEmbed("text", "embed").build()).setEphemeral(true).queue();
                 return;
             }
 
@@ -217,7 +184,7 @@ public class TagCommand extends Command {
         }
     }
 
-
+    @Command(name = "tag.get", description = "Gets a tag", permission = "command.utility.tag.get")
     public void getTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
@@ -233,6 +200,7 @@ public class TagCommand extends Command {
         }
     }
 
+    @Command(name = "tag.delete", description = "Deletes a tag", permission = "command.utility.tag.delete")
     public void deleteTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
@@ -244,13 +212,14 @@ public class TagCommand extends Command {
 
         TagUtil.deleteTagByTrigger(trigger, guildId);
         event.replyEmbeds(new EmbedBuilder()
-                .setTitle("`" + trigger + "` has been deleted!")
+                .setDescription("`" + trigger + "` has been deleted!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
     }
 
+    @Command(name = "tag.clear", description = "Clears ALL of this guild's tags. This action is irreversible", permission = "command.utility.tag.clear")
     public void clearTags(SlashCommandEvent event) {
-        event.replyEmbeds(new EmbedBuilder().setTitle("Are you sure you want to clear all tags for this guild!")
+        event.replyEmbeds(new EmbedBuilder().setDescription("Are you sure you want to clear all tags for this guild!")
                         .setColor(EmbedColour.NEUTRAL.getColour()).build())
                 .addActionRow(
                         Button.success("clear_all_tags=true", "Yes"),
@@ -258,44 +227,27 @@ public class TagCommand extends Command {
                 .queue();
     }
 
-    public void modifyTagPermissions(SlashCommandEvent event) {
-
-        GuildSettings guildSettings = new GuildSettings(event.getGuild().getId());
-        if (event.getOption("role") != null) {
-
-            guildSettings.setTagManagementRoleId(event.getOption("role").getAsRole().getId());
-            event.replyEmbeds(new EmbedBuilder()
-                    .setDescription("The role that manages tags has been set to " + event.getOption("role").getAsRole().getAsMention())
-                    .setColor(EmbedColour.YES.getColour())
-                    .build()).queue();
-        } else {
-            event.replyEmbeds(new EmbedBuilder()
-                    .setDescription("The role that manages tags is " + guildSettings.getTagManagementRole().getAsMention())
-                    .setColor(EmbedColour.NEUTRAL.getColour())
-                    .build()).queue();
-        }
-
-    }
-
 
     @Override
     public void onButtonClick(ButtonClickEvent event) {
+
+        if (!PermissionUtil.hasPermission("command.utility.tag.clear", event.getMember())) return;
+
         if (event.getComponentId().equals("clear_all_tags=true")) {
-            if (!RoleUtil.isStaff(event.getMember())) return;
             event.getMessage().editMessageEmbeds(new EmbedBuilder()
-                    .setTitle("This guild's tags have been cleared!")
+                    .setDescription("This guild's tags have been cleared!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).override(true).queue();
             TagUtil.deleteGuildsTags(event.getGuild().getId());
 
         } else {
-            if (!RoleUtil.isStaff(event.getMember())) return;
-            event.getMessage().editMessageEmbeds(new EmbedBuilder().setTitle("This guild's tags have not been cleared!")
+            event.getMessage().editMessageEmbeds(new EmbedBuilder().setDescription("This guild's tags have not been cleared!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).override(true).queue();
         }
     }
 
+    @Command(name = "tag.list", description = "Lists all of the guild's tags", permission = "command.utility.tag.list")
     public void listTags(SlashCommandEvent event) {
         ArrayList<EmbedTag> embedTags = TagUtil.getGuildsEmbedTags(event.getGuild().getId());
         ArrayList<TextTag> textTags = TagUtil.getGuildsTextTags(event.getGuild().getId());
@@ -328,14 +280,14 @@ public class TagCommand extends Command {
             }
 
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("Available Tags")
+                    .setDescription("Available Tags")
                     .setColor(EmbedColour.NEUTRAL.getColour())
                     .setDescription(tags.toString())
                     .build()).queue();
 
         } else {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("The guild has no tags!")
+                    .setDescription("The guild has no tags!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
         }
@@ -345,7 +297,7 @@ public class TagCommand extends Command {
     public EmbedBuilder checkLength(String content, int length, String option) {
         if (content.length() > length) {
             return new EmbedBuilder()
-                    .setTitle("The " + option + " was too long. It can only be " + length + " characters!")
+                    .setDescription("The " + option + " was too long. It can only be " + length + " characters!")
                     .setColor(EmbedColour.NO.getColour());
         }
         return null;
@@ -371,7 +323,7 @@ public class TagCommand extends Command {
         if (colour != null) {
             if (!RegexUtil.validHexColour(colour)) {
                 event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("`" + colour + "` is not a valid hex colour!")
+                        .setDescription("`" + colour + "` is not a valid hex colour!")
                         .setColor(EmbedColour.NO.getColour())
                         .build()).setEphemeral(true).queue();
                 return false;
@@ -381,7 +333,7 @@ public class TagCommand extends Command {
         if (thumbnail != null) {
             if (!thumbnail.startsWith("https") && !thumbnail.startsWith("http")) {
                 event.replyEmbeds(new EmbedBuilder()
-                        .setTitle("That is not a valid url, as it does not start with http or https!")
+                        .setDescription("That is not a valid url, as it does not start with http or https!")
                         .setColor(EmbedColour.NO.getColour())
                         .build()).setEphemeral(true).queue();
                 return false;
@@ -392,30 +344,8 @@ public class TagCommand extends Command {
 
     public EmbedBuilder notCorrectTagTypeEmbed(String currentType, String correctType) {
         return new EmbedBuilder()
-                .setTitle("This tag is a " + correctType + " tag, not an " + currentType + " tag!")
+                .setDescription("This tag is a " + correctType + " tag, not an " + currentType + " tag!")
                 .setColor(EmbedColour.NO.getColour());
     }
 
-    @Override
-    public String getCommandName() {
-        return "tag";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Allows the managing of both text and embedded tags.";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/tag embed create <trigger> <title> [description] [colour] [thumbnail]\n" +
-                "/tag embed edit <trigger> [title] [description] [colour] [thumbnail]\n" +
-                "/tag text create <trigger> <content>\n" +
-                "/tag text edit <trigger> <content>\n" +
-                "/tag get <trigger>\n" +
-                "/tag delete <trigger>\n" +
-                "/tag clear\n" +
-                "/tag list\n" +
-                "/tag setrole <role>";
-    }
 }

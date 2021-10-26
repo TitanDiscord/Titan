@@ -45,6 +45,26 @@ public class WarnUtil {
         return userWarnings;
     }
 
+    public static ArrayList<Warning> getGuildsWarnings(String guildId) {
+        ArrayList<Warning> guildWarnings = new ArrayList<>();
+        try (final Connection connection = SQLiteDataSource.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement("SELECT * FROM warnings where guild_id = ?")) {
+
+            preparedStatement.setString(1, guildId);
+
+            ResultSet result = preparedStatement.executeQuery();
+
+            while (result.next())
+                guildWarnings.add(new Warning(result.getString("id")));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return guildWarnings;
+    }
+
     public static void clearUsersWarnings(String guildId, String userId) {
         for (Warning warning : getUsersWarnings(guildId, userId))
             removeWarningById(warning.getId());

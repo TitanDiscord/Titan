@@ -4,35 +4,21 @@ import me.anutley.titan.commands.Command;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import org.jetbrains.annotations.NotNull;
 
-public class PingCommand extends Command {
+public class PingCommand extends ListenerAdapter {
 
-    public static CommandData PingCommandData = new CommandData("ping", "Gets the current bots ping");
+    public static CommandData PingCommandData = new CommandData("ping", "Gets the bots current gateway ping");
 
-    @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        if (!event.getName().equals("ping")) return;
+
+    @Command(name = "ping", description = "Gets the bots current gateway ping", permission = "command.utility.ping")
+    public static void execute(SlashCommandEvent event) {
 
         event.replyEmbeds(new EmbedBuilder()
-                .setTitle("🏓 Gateway Ping - " + event.getJDA().getGatewayPing())
+                .setDescription("🏓 Gateway Ping - " + event.getJDA().getGatewayPing())
                 .setColor(EmbedColour.NEUTRAL.getColour())
                 .build()).queue();
     }
 
-    @Override
-    public String getCommandName() {
-        return "ping";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Gets the bots ping";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/ping";
-    }
 }

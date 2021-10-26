@@ -1,6 +1,5 @@
 package me.anutley.titan;
 
-import me.anutley.titan.commands.Command;
 import me.anutley.titan.commands.dev.EvalCommand;
 import me.anutley.titan.commands.dev.RestartCommand;
 import me.anutley.titan.commands.dev.ShutdownCommand;
@@ -23,16 +22,49 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Titan {
 
-    public static ArrayList<Command> commands = new ArrayList<>();
+    public static ArrayList<Class<?>> commands = new ArrayList<>();
     public static JDA jda;
+    public static long startupTime;
 
     public static void main(String[] arguments) throws LoginException, InterruptedException, IOException {
 
+        startupTime = System.currentTimeMillis();
+
         Config config = new Config();
         new SQLiteDataSource();
+
+        registerCommands(
+                //Fun Commands
+                AvatarCommand.class,
+                CoinCommand.class,
+                DiceCommand.class,
+
+                //Moderation Commands
+                BanCommand.class,
+                KickCommand.class,
+                LockdownCommand.class,
+                SetNickCommand.class,
+                SlowmodeCommand.class,
+                WarnCommand.class,
+
+                //Utility Commands
+                AnnounceCommand.class,
+                GitHubCommand.class,
+                HelpCommand.class,
+                InfoCommand.class,
+                InviteCommand.class,
+                PingCommand.class,
+                RemindCommand.class,
+                RolePermissionsCommand.class,
+                TagCommand.class,
+                WikiCommand.class
+        );
+
+        new SettingsBaseCommand().loadSuperclasses();
 
         jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
                 .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
@@ -41,44 +73,15 @@ public class Titan {
 
                 // Commands
                 .addEventListeners(
+
                         //Dev Commands
                         new EvalCommand(),
                         new RestartCommand(),
                         new ShutdownCommand(),
                         new UpdateCommand(),
 
-                        //Fun Commands
-                        registerCommand(new AvatarCommand()),
-                        registerCommand(new CoinCommand()),
-                        registerCommand(new DiceCommand()),
-
-                        //Settings Commands
-                        registerCommand(new SettingsBaseCommand()),
-
-                        //Moderation Commands
-                        registerCommand(new BanCommand()),
-                        registerCommand(new KickCommand()),
-                        registerCommand(new LockdownCommand()),
-                        registerCommand(new SetNickCommand()),
-                        registerCommand(new SlowmodeCommand()),
-                        registerCommand(new WarnCommand()),
-
-                        //Utility Commands
-                        registerCommand(new AnnounceCommand()),
-                        registerCommand(new GitHubCommand()),
-                        registerCommand(new GuildInfoCommand()),
-                        registerCommand(new HelpCommand()),
-                        registerCommand(new InviteCommand()),
-                        registerCommand(new PingCommand()),
-                        registerCommand(new RemindCommand()),
-                        registerCommand(new StatsCommand()),
-                        registerCommand(new TagCommand()),
-                        registerCommand(new UserInfoCommand()),
-                        registerCommand(new WikiCommand())
-                )
-
-                // Events
-                .addEventListeners(
+                        //Events
+                        new CommandListener(),
                         new IllegalPingListener(),
                         new JoinLeaveListener(),
                         new LockdownListener(),
@@ -87,6 +90,7 @@ public class Titan {
                         new ReadyListener(),
                         new TagListener()
                 ).build();
+
 
         jda.awaitReady();
 
@@ -114,31 +118,34 @@ public class Titan {
                         // Utility Commands
                         AnnounceCommand.AnnounceCommandData,
                         GitHubCommand.GitHubCommandData,
-                        GuildInfoCommand.GuildInfoCommandData,
                         HelpCommand.HelpCommandData,
+                        InfoCommand.InfoCommandData,
                         InviteCommand.InviteCommandData,
                         PingCommand.PingCommandData,
                         RemindCommand.RemindCommandData,
-                        StatsCommand.StatsCommandData,
+                        RolePermissionsCommand.RolePermissionsSettingsCommandData,
                         TagCommand.TagCommandData,
-                        UserInfoCommand.UserInfoCommandData,
                         WikiCommand.WikiCommandData
                 )
                 .queue();
         ReminderInitialiser.run();
     }
 
-    public static Command registerCommand(Command command) {
-        commands.add(command);
-        return command;
+    public static ArrayList<Class<?>> registerCommands(Class<?>... command) {
+        commands.addAll(Arrays.asList(command));
+        return commands;
     }
 
-    public static ArrayList<Command> getRegisteredCommands() {
+    public static ArrayList<Class<?>> getRegisteredCommands() {
         return commands;
     }
 
     public static JDA getJda() {
         return jda;
+    }
+
+    public static long getStartupTime() {
+        return startupTime;
     }
 
 }

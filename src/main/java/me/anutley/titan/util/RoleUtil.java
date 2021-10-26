@@ -1,6 +1,5 @@
 package me.anutley.titan.util;
 
-import me.anutley.titan.database.objects.GuildSettings;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 
@@ -28,23 +27,4 @@ public class RoleUtil {
         return member.getRoles().size() != 0 ? member.getRoles().get(0) : member.getGuild().getPublicRole();
 
     }
-
-
-    public static boolean isAdmin(Member member) {
-        return RoleUtil.hasRole(member, new GuildSettings(member.getGuild().getId()).getAdminRoleId()) || member.isOwner();
-    }
-
-    public static boolean isMod(Member member) {
-        return RoleUtil.hasRole(member, new GuildSettings(member.getGuild().getId()).getModRoleId());
-    }
-
-    public static boolean isStaff(Member member) {
-        return isAdmin(member) || isMod(member);
-    }
-
-    public static boolean isTagManager(Member member) {
-        return RoleUtil.hasRole(member, new GuildSettings(member.getGuild().getId()).getTagManagementRoleId()) || isMod(member) || isAdmin(member);
-    }
-
-
 }

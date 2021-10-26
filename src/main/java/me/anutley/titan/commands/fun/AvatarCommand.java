@@ -8,44 +8,28 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-public class AvatarCommand extends Command {
+public class AvatarCommand {
 
 
-    public static CommandData AvatarCommandData = new CommandData("avatar", "Returns the avatar of either yourself or a specified user")
+    public static final CommandData AvatarCommandData = new CommandData("avatar", "Returns the avatar of either yourself or a specified user")
             .addOption(OptionType.USER, "user", "The user you want to find the avatar of", false);
 
-    @Override
-    public void onSlashCommand(SlashCommandEvent event) {
-        User userAvatar;
-        if (!event.getName().equals("avatar")) return;
+    @Command(name = "avatar", description = "Returns the avatar of either yourself or a specified user", permission = "command.fun.avatar")
+    public static void avatarCommand(SlashCommandEvent event) {
 
-        if(event.getOption("user") == null) userAvatar = event.getUser();
+        User userAvatar;
+
+        if (event.getOption("user") == null) userAvatar = event.getUser();
         else userAvatar = event.getOption("user").getAsUser();
 
         if (userAvatar.getAvatarUrl() == null) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setTitle("This user does not have an avatar")
+                    .setDescription(userAvatar.getAsMention() + " does not have an avatar")
                     .setColor(EmbedColour.NO.getColour())
-                    .build()).queue();
-        }
-
-        else {
+                    .build()).setEphemeral(true).queue();
+        } else {
             event.reply(userAvatar.getAvatarUrl()).queue();
         }
     }
 
-    @Override
-    public String getCommandName() {
-        return "avatar";
-    }
-
-    @Override
-    public String getCommandDescription() {
-        return "Returns the avatar of either yourself or a specified user";
-    }
-
-    @Override
-    public String getCommandUsage() {
-        return "/avatar [user]";
-    }
 }

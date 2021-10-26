@@ -69,7 +69,7 @@ public class PingProtectionSettings {
 
                 newPingProtectionSettings.setString(1, this.getGuildId());
                 newPingProtectionSettings.setBoolean(2, this.isEnabled());
-                newPingProtectionSettings.setString(3, !this.getRoles().toString().equals("[]") ? this.getRoles().toString().replaceAll(" ", "") : null);
+                newPingProtectionSettings.setString(3, this.getRoles() != null ? !this.getRoles().toString().equals("[]") ? this.getRoles().toString().replaceAll(" ", "") : null : null);
                 newPingProtectionSettings.setInt(4, this.getThreshold());
                 newPingProtectionSettings.setString(5, this.getAction());
                 newPingProtectionSettings.executeUpdate();
@@ -79,7 +79,7 @@ public class PingProtectionSettings {
                         .prepareStatement("UPDATE ping_protection_settings set enabled = ?, roles = ?, threshold = ?, action = ? where guild_id = ?");
 
                 editPingProtectionSettings.setBoolean(1, this.isEnabled());
-                editPingProtectionSettings.setString(2, !this.getRoles().toString().equals("[]") ? this.getRoles().toString().replaceAll(" ", "") : null);
+                editPingProtectionSettings.setString(2, this.getRoles() != null ? !this.getRoles().toString().equals("[]") ? this.getRoles().toString().replaceAll(" ", "") : null : null);
                 editPingProtectionSettings.setInt(3, this.getThreshold());
                 editPingProtectionSettings.setString(4, this.getAction());
                 editPingProtectionSettings.setString(5, this.getGuildId());
@@ -87,7 +87,8 @@ public class PingProtectionSettings {
                 editPingProtectionSettings.executeUpdate();
             }
 
-        } catch (SQLException ignored) {
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return this;
     }
@@ -110,7 +111,7 @@ public class PingProtectionSettings {
     }
 
     public String getAction() {
-        return action;
+        return action == null ? "kick" : action;
     }
 
 

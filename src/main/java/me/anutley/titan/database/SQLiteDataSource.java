@@ -54,6 +54,7 @@ public class SQLiteDataSource {
         createLeaveTable();
         createWarnsTable();
         createRemindersTable();
+        createPermissionsTable();
     }
 
     public SQLiteDataSource() {
@@ -69,9 +70,6 @@ public class SQLiteDataSource {
             statement.execute("CREATE TABLE IF NOT EXISTS guild_settings (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "guild_id VARCHAR(20) NOT NULL," +
-                    "guild_admin_role VARCHAR(20)," +
-                    "guild_mod_role VARCHAR(20)," +
-                    "tag_management_role VARCHAR(20)," +
                     "mute_role VARCHAR(20)," +
                     "lockdown BOOLEAN NOT NULL DEFAULT false," +
                     "auto_quote BOOLEAN NOT NULL DEFAULT false" +
@@ -204,6 +202,22 @@ public class SQLiteDataSource {
                     ");");
 
             LOGGER.info("Reminders table initialised");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void createPermissionsTable() {
+        try (final Statement statement = getConnection().createStatement()) {
+
+            statement.execute("CREATE TABLE IF NOT EXISTS guild_permissions (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "guild_id VARCHAR(20) NOT NULL," +
+                    "role_id VARCHAR(20) NOT NULL," +
+                    "permissions VARCHAR(10000)" +
+                    ");");
+
+            LOGGER.info("Permissions table initialised");
         } catch (SQLException e) {
             e.printStackTrace();
         }

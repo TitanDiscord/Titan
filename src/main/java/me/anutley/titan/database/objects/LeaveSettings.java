@@ -93,7 +93,7 @@ public class LeaveSettings {
     }
 
     public String getMessage() {
-        return message;
+        return message == null ? "%user% has left %guild_name%" : message;
     }
 
     public LeaveSettings setGuildId(String guildId) {
