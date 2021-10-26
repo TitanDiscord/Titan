@@ -29,8 +29,11 @@ public class Titan {
 
     public static ArrayList<Class<?>> commands = new ArrayList<>();
     public static JDA jda;
+    public static long startupTime;
 
     public static void main(String[] arguments) throws LoginException, InterruptedException, IOException {
+
+        startupTime = System.currentTimeMillis();
 
         Config config = new Config();
         new SQLiteDataSource();
@@ -55,14 +58,12 @@ public class Titan {
                 //Utility Commands
                 AnnounceCommand.class,
                 GitHubCommand.class,
-                GuildInfoCommand.class,
                 HelpCommand.class,
+                InfoCommand.class,
                 InviteCommand.class,
                 PingCommand.class,
                 RemindCommand.class,
-                StatsCommand.class,
                 TagCommand.class,
-                UserInfoCommand.class,
                 WikiCommand.class
         );
 
@@ -123,14 +124,12 @@ public class Titan {
                         // Utility Commands
                         AnnounceCommand.AnnounceCommandData,
                         GitHubCommand.GitHubCommandData,
-                        GuildInfoCommand.GuildInfoCommandData,
                         HelpCommand.HelpCommandData,
+                        InfoCommand.InfoCommandData,
                         InviteCommand.InviteCommandData,
                         PingCommand.PingCommandData,
                         RemindCommand.RemindCommandData,
-                        StatsCommand.StatsCommandData,
                         TagCommand.TagCommandData,
-                        UserInfoCommand.UserInfoCommandData,
                         WikiCommand.WikiCommandData
                 )
                 .queue();
@@ -148,6 +147,10 @@ public class Titan {
 
     public static JDA getJda() {
         return jda;
+    }
+
+    public static long getStartupTime() {
+        return startupTime;
     }
 
 }
