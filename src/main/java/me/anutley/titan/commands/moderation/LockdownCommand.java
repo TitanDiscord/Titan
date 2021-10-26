@@ -15,7 +15,7 @@ public class LockdownCommand {
             .addSubcommands(new SubcommandData("disable", "Disables lockdown for the server"))
             .addSubcommands(new SubcommandData("status", "Shows whether lockdown is enabled or not"));
 
-    @Command(name = "lockdown.enable", description = "", permission = "command.moderation.lockdown.enable")
+    @Command(name = "lockdown.enable", description = "Enables lockdown for the server", permission = "command.moderation.lockdown.enable")
     public static void enableLockdown(SlashCommandEvent event) {
 
         new GuildSettings(event.getGuild().getId())
@@ -28,7 +28,7 @@ public class LockdownCommand {
                 .build()).queue();
     }
 
-    @Command(name = "lockdown.disable", description = "", permission = "command.moderation.lockdown.disable")
+    @Command(name = "lockdown.disable", description = "Disables lockdown for the server", permission = "command.moderation.lockdown.disable")
     public static void disableLockdown(SlashCommandEvent event) {
 
         new GuildSettings(event.getGuild().getId())
@@ -41,7 +41,7 @@ public class LockdownCommand {
                 .build()).queue();
     }
 
-    @Command(name = "lockdown.status", description = "", permission = "command.moderation.lockdown.status")
+    @Command(name = "lockdown.status", description = "Shows whether lockdown is enabled or not", permission = "command.moderation.lockdown.status")
     public static void lockdownStatus(SlashCommandEvent event) {
 
         boolean lockdown = new GuildSettings(event.getGuild().getId()).isLockdown();
