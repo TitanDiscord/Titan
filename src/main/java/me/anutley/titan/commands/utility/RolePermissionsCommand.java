@@ -1,4 +1,4 @@
-package me.anutley.titan.commands.permission;
+package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.RolePermissions;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class RolePermissionsSettingsCommand {
+public class RolePermissionsCommand {
 
     public static CommandData RolePermissionsSettingsCommandData = new CommandData("permission", "Manages a roles permission")
             .addSubcommands(new SubcommandData("add", "Adds a permission to a role")
@@ -32,7 +32,7 @@ public class RolePermissionsSettingsCommand {
                     .addOption(OptionType.ROLE, "role", "The role to add the permissions to", true));
 
 
-    @Command(name = "permission.add", description = "Adds a permission to a role", permission = "command.permission.add")
+    @Command(name = "permission.add", description = "Adds a permission to a role", permission = "command.utility.permission.add")
     public static void addPermission(@NotNull SlashCommandEvent event) {
 
         Role role = event.getOption("role").getAsRole();
@@ -80,7 +80,7 @@ public class RolePermissionsSettingsCommand {
         rolePermissions.setPermissions(rolePermissionList).save();
     }
 
-    @Command(name = "permission.remove", description = "Removes a permission from a role", permission = "command.permission.remove")
+    @Command(name = "permission.remove", description = "Removes a permission from a role", permission = "command.utility.permission.remove")
     public static void removePermission(@NotNull SlashCommandEvent event) {
 
         Role role = event.getOption("role").getAsRole();
@@ -113,7 +113,7 @@ public class RolePermissionsSettingsCommand {
                     .setDescription("The permission `" + perm + "` has been removed from " + role.getAsMention() + "!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
-//
+
             rolePermissions.setPermissions(rolePermissionList).save();
         }
         if (rolePermissionList == null)
@@ -124,7 +124,7 @@ public class RolePermissionsSettingsCommand {
 
     }
 
-    @Command(name = "permission.list", description = "Lists a roles' permissions", permission = "command.permission.list")
+    @Command(name = "permission.list", description = "Lists a roles' permissions", permission = "command.utility.permission.list")
     public static void listPermissions(@NotNull SlashCommandEvent event) {
 
         Role role = event.getOption("role").getAsRole();
@@ -153,7 +153,7 @@ public class RolePermissionsSettingsCommand {
 
     }
 
-    @Command(name = "permission.createdefault", description = "Adds default permissions to a role", permission = "command.permission.createdefault")
+    @Command(name = "permission.createdefault", description = "Adds default permissions to a role", permission = "command.utility.permission.createdefault")
     public static void createDefaultPermissions (@NotNull SlashCommandEvent event) {
 
         Role role = event.getOption("role").getAsRole();
@@ -165,13 +165,11 @@ public class RolePermissionsSettingsCommand {
 
         permissions.add("command.fun");
         permissions.add("command.utility.github");
-        permissions.add("command.utility.guildinfo");
+        permissions.add("command.utility.info");
         permissions.add("command.utility.help");
         permissions.add("command.utility.invite");
         permissions.add("command.utility.ping");
         permissions.add("command.utility.reminder");
-        permissions.add("command.utility.stats");
-        permissions.add("command.utility.userinfo");
         permissions.add("command.utility.wiki");
 
         StringBuilder perms = new StringBuilder();

@@ -36,7 +36,6 @@ public class CommandUtil {
         }
 
         categoryCommands.sort(Comparator.comparing(Command::name));
-
         return categoryCommands;
     }
 
@@ -44,12 +43,25 @@ public class CommandUtil {
         ArrayList<Command> commands = new ArrayList<>();
 
         for (Command command : getCommands()) {
-            String baseCommand = command.name().split("\\.")[0];
+            StringBuilder baseCommand = new StringBuilder();
+
+            int index = 0;
+
+            if (command.name().split("\\.")[0].equals("settings")) {
+                baseCommand.append(command.name().split("\\.")[1]);
+                index = 1;
+            } else {
+                baseCommand.append(command.name().split("\\.")[0]);
+            }
+
+            int finalIndex = index;
             if (command.permission().split("\\.")[1].equals(category)
-                    && commands.stream().noneMatch(w -> Objects.equals(w.name().split("\\.")[0], baseCommand)))
+                    && commands.stream().noneMatch(w -> Objects.equals(w.name().split("\\.")[finalIndex], baseCommand.toString())))
                 commands.add(command);
+
         }
 
+        commands.sort(Comparator.comparing(Command::name));
         return commands;
     }
 

@@ -8,7 +8,6 @@ import me.anutley.titan.commands.fun.AvatarCommand;
 import me.anutley.titan.commands.fun.CoinCommand;
 import me.anutley.titan.commands.fun.DiceCommand;
 import me.anutley.titan.commands.moderation.*;
-import me.anutley.titan.commands.permission.RolePermissionsSettingsCommand;
 import me.anutley.titan.commands.settings.SettingsBaseCommand;
 import me.anutley.titan.commands.utility.*;
 import me.anutley.titan.database.ReminderInitialiser;
@@ -52,9 +51,6 @@ public class Titan {
                 SlowmodeCommand.class,
                 WarnCommand.class,
 
-                //Permission Commands
-                RolePermissionsSettingsCommand.class,
-
                 //Utility Commands
                 AnnounceCommand.class,
                 GitHubCommand.class,
@@ -63,6 +59,7 @@ public class Titan {
                 InviteCommand.class,
                 PingCommand.class,
                 RemindCommand.class,
+                RolePermissionsCommand.class,
                 TagCommand.class,
                 WikiCommand.class
         );
@@ -115,9 +112,6 @@ public class Titan {
                         SlowmodeCommand.SlowmodeCommandData,
                         WarnCommand.WarnCommandData,
 
-                        // Permission Commands
-                        RolePermissionsSettingsCommand.RolePermissionsSettingsCommandData,
-
                         //Settings Command
                         SettingsBaseCommand.SettingsCommandData,
 
@@ -129,6 +123,7 @@ public class Titan {
                         InviteCommand.InviteCommandData,
                         PingCommand.PingCommandData,
                         RemindCommand.RemindCommandData,
+                        RolePermissionsCommand.RolePermissionsSettingsCommandData,
                         TagCommand.TagCommandData,
                         WikiCommand.WikiCommandData
                 )

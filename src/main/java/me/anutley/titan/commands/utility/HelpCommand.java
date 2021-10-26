@@ -78,22 +78,25 @@ public class HelpCommand {
 
             if (pageNumber == 1)
                 builder.setTitle(WordUtils.capitalize(category) + " Commands")
-                        .setDescription("To find out more about a specific command run `/help command <command>`")
-                        .setColor(EmbedColour.NEUTRAL.getColour());
+                        .setDescription("To find out more about a specific command run `/help command <command>`");
 
             for (int j = 0; j < 25; j++) {
                 if (commandCount >= count) break;
 
                 Command command = commands.get(commandCount);
 
-                builder.addField(command.name(), "`Description:` " + command.description() + "\n`Permission:` " + command.permission(), true);
+                builder.addField(command.name(), "`Description:` " + command.description() + "\n`Permission:` " + command.permission(), false);
                 commandCount++;
             }
 
             if (pageNumber == 1)
-                event.replyEmbeds(builder.build()).queue();
+                event.replyEmbeds(builder
+                        .setColor(EmbedColour.NEUTRAL.getColour())
+                        .build()).queue();
             else
-                event.getChannel().sendMessageEmbeds(builder.build()).queue();
+                event.getChannel().sendMessageEmbeds(builder
+                        .setColor(EmbedColour.NEUTRAL.getColour())
+                        .build()).queue();
 
         }
     }
@@ -103,52 +106,32 @@ public class HelpCommand {
 
         StringBuilder funCommands = new StringBuilder();
         StringBuilder moderationCommands = new StringBuilder();
-        StringBuilder permissionCommands = new StringBuilder();
         StringBuilder settingsCommands = new StringBuilder();
         StringBuilder utilityCommands = new StringBuilder();
 
 
         for (Command command : CommandUtil.getBaseCommandsByCategory("fun"))
-            funCommands.append(addCommand(command.name())).append("\n");
+            funCommands.append(command.name().split("\\.")[0]).append("\n");
 
         for (Command command : CommandUtil.getBaseCommandsByCategory("moderation"))
-            moderationCommands.append(addCommand(command.name())).append("\n");
-
-        for (Command command : CommandUtil.getBaseCommandsByCategory("permission"))
-            permissionCommands.append(addCommand(command.name())).append("\n");
+            moderationCommands.append(command.name().split("\\.")[0]).append("\n");
 
         for (Command command : CommandUtil.getBaseCommandsByCategory("settings"))
-            settingsCommands.append(addCommand(command.name())).append("\n");
+            settingsCommands.append(command.name().split("\\.")[1]).append("\n");
 
         for (Command command : CommandUtil.getBaseCommandsByCategory("utility"))
-            utilityCommands.append(addCommand(command.name())).append("\n");
+            utilityCommands.append(command.name().split("\\.")[0]).append("\n");
 
 
         event.replyEmbeds(new EmbedBuilder()
                 .setTitle("All Commands!")
                 .setDescription("To find out more about a specific category run `/help category <category>`")
                 .setColor(EmbedColour.NEUTRAL.getColour())
-                .addField("Fun Commands:", funCommands.toString(), true)
-                .addField("Moderation Commands:", moderationCommands.toString(), true)
-                .addField("Permission Commands:", permissionCommands.toString(), true)
-                .addField("Settings Commands:", settingsCommands.toString(), true)
-                .addField("Utility Commands:", utilityCommands.toString(), true)
+                .addField("Fun Commands:", funCommands.toString(), false)
+                .addField("Moderation Commands:", moderationCommands.toString(), false)
+                .addField("Settings Commands:", settingsCommands.toString(), false)
+                .addField("Utility Commands:", utilityCommands.toString(), false)
                 .build()).queue();
     }
 
-    public static String addCommand(String commandName) {
-        String[] command = commandName.split("\\.");
-        if (command.length == 1) {
-            return command[0];
-        }
-
-        if (command.length == 2) {
-            return command[0];
-        }
-
-        if (command.length == 3) {
-            return command[1];
-        }
-        return null;
-    }
 }
