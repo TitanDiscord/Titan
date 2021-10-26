@@ -35,7 +35,6 @@ public class Titan {
         Config config = new Config();
         new SQLiteDataSource();
 
-
         registerCommands(
                 //Fun Commands
                 AvatarCommand.class,
@@ -69,7 +68,6 @@ public class Titan {
 
         new SettingsBaseCommand().loadSuperclasses();
 
-
         jda = JDABuilder.createDefault(config.get("DISCORD_TOKEN"))
                 .setEnabledIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
                 .disableCache(CacheFlag.VOICE_STATE)
@@ -99,7 +97,7 @@ public class Titan {
         jda.awaitReady();
 
 
-        jda.getGuildById("833042350850441216")
+        jda
                 .updateCommands()
                 .addCommands(
 
