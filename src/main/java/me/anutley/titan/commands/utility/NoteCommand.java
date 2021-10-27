@@ -100,8 +100,6 @@ public class NoteCommand {
             }
             Note note = new Note(id, event.getGuild().getId());
 
-            System.out.println(note.getGuildId());
-
             ArrayList<Note> notes = NoteUtil.getUsersNotes(event.getGuild().getId(), user.getId());
 
             if (notes.stream().anyMatch(w -> Objects.equals(w.getId(), note.getId()))) {
