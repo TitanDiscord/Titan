@@ -36,6 +36,14 @@ public class WarnCommand {
         String reason = event.getOption("reason").getAsString();
         boolean trimmed = false;
 
+        if (event.getOption("user").getAsUser().getId().equals(event.getUser().getId())) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("You cannot warn yourself!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
+
         if (reason.length() > 1024) {
             reason = reason.substring(0, 1024);
             trimmed = true;
