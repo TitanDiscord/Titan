@@ -62,7 +62,7 @@ public class TagCommand extends ListenerAdapter {
 
 
     @Command(name = "tag.embed.create", description = "Creates an embedded tag", permission = "command.utility.tag.embed.create")
-    public void createEmbedTag(SlashCommandEvent event) {
+    public static void createEmbedTag(SlashCommandEvent event) {
 
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
@@ -92,7 +92,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
     @Command(name = "tag.embed.edit", description = "Edits an embedded tag", permission = "command.utility.tag.embed.edit")
-    public void editEmbedTag(SlashCommandEvent event) {
+    public static void editEmbedTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
@@ -129,7 +129,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
     @Command(name = "tag.text.create", description = "Creates a text tag", permission = "command.utility.tag.text.create")
-    public void createTextTag(SlashCommandEvent event) {
+    public static void createTextTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
@@ -156,7 +156,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
     @Command(name = "tag.text.edit", description = "Edits a text tag", permission = "command.utility.tag.text.edit")
-    public void editTextTag(SlashCommandEvent event) {
+    public static void editTextTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
@@ -185,7 +185,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
     @Command(name = "tag.get", description = "Gets a tag", permission = "command.utility.tag.get")
-    public void getTag(SlashCommandEvent event) {
+    public static void getTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
@@ -201,7 +201,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
     @Command(name = "tag.delete", description = "Deletes a tag", permission = "command.utility.tag.delete")
-    public void deleteTag(SlashCommandEvent event) {
+    public static void deleteTag(SlashCommandEvent event) {
         String trigger = event.getOption("trigger").getAsString();
         String guildId = event.getGuild().getId();
 
@@ -218,7 +218,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
     @Command(name = "tag.clear", description = "Clears ALL of this guild's tags. This action is irreversible", permission = "command.utility.tag.clear")
-    public void clearTags(SlashCommandEvent event) {
+    public static void clearTags(SlashCommandEvent event) {
         event.replyEmbeds(new EmbedBuilder().setDescription("Are you sure you want to clear all tags for this guild!")
                         .setColor(EmbedColour.NEUTRAL.getColour()).build())
                 .addActionRow(
@@ -248,7 +248,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
     @Command(name = "tag.list", description = "Lists all of the guild's tags", permission = "command.utility.tag.list")
-    public void listTags(SlashCommandEvent event) {
+    public static void listTags(SlashCommandEvent event) {
         ArrayList<EmbedTag> embedTags = TagUtil.getGuildsEmbedTags(event.getGuild().getId());
         ArrayList<TextTag> textTags = TagUtil.getGuildsTextTags(event.getGuild().getId());
 
@@ -294,7 +294,7 @@ public class TagCommand extends ListenerAdapter {
     }
 
 
-    public EmbedBuilder checkLength(String content, int length, String option) {
+    public static EmbedBuilder checkLength(String content, int length, String option) {
         if (content.length() > length) {
             return new EmbedBuilder()
                     .setDescription("The " + option + " was too long. It can only be " + length + " characters!")
@@ -303,7 +303,7 @@ public class TagCommand extends ListenerAdapter {
         return null;
     }
 
-    public boolean checkArgs(SlashCommandEvent event, String title, String description, String colour, String thumbnail) {
+    public static boolean checkArgs(SlashCommandEvent event, String title, String description, String colour, String thumbnail) {
         if (title != null) {
             EmbedBuilder titleLengthEmbed = checkLength(title, 256, "title");
             if (titleLengthEmbed != null) {
@@ -342,7 +342,7 @@ public class TagCommand extends ListenerAdapter {
         return true;
     }
 
-    public EmbedBuilder notCorrectTagTypeEmbed(String currentType, String correctType) {
+    public static EmbedBuilder notCorrectTagTypeEmbed(String currentType, String correctType) {
         return new EmbedBuilder()
                 .setDescription("This tag is a " + correctType + " tag, not an " + currentType + " tag!")
                 .setColor(EmbedColour.NO.getColour());
