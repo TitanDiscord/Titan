@@ -3,6 +3,7 @@ package me.anutley.titan.listeners;
 import me.anutley.titan.database.objects.PingProtectionSettings;
 import me.anutley.titan.database.objects.PingProtectionUserData;
 import me.anutley.titan.database.objects.Warning;
+import me.anutley.titan.database.util.WarnUtil;
 import me.anutley.titan.util.RoleUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -99,13 +100,13 @@ public class IllegalPingListener extends ListenerAdapter {
                 event.getMember().ban(0, "Bypassing the illegal ping count!").queue();
                 break;
             case "warned":
-                new Warning(null)
+                WarnUtil.warnUser(new Warning(null)
                         .setGuildId(event.getGuild().getId())
                         .setUserId(event.getMember().getId())
                         .setModeratorId(event.getJDA().getSelfUser().getId())
                         .setContent("Excessive mentioning of staff")
                         .setTimeCreated(System.currentTimeMillis())
-                        .save();
+                        .save());
                 break;
         }
     }

@@ -49,13 +49,13 @@ public class WarnCommand {
             trimmed = true;
         }
 
-        new Warning(null)
+        WarnUtil.warnUser(new Warning(null)
                 .setGuildId(event.getGuild().getId())
                 .setUserId(event.getOption("user").getAsUser().getId())
                 .setModeratorId(event.getMember().getId())
                 .setContent(reason)
                 .setTimeCreated(System.currentTimeMillis())
-                .save();
+                .save());
 
         event.replyEmbeds(new EmbedBuilder()
                 .setColor(EmbedColour.YES.getColour())

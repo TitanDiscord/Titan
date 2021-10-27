@@ -15,6 +15,7 @@ public class GuildSettings {
     private String muteRoleId;
     private boolean lockdown;
     private boolean autoQuote;
+    private boolean dmOnWarn;
 
     public GuildSettings(String guildId) {
 
@@ -32,7 +33,8 @@ public class GuildSettings {
                         .setGuildId(guildId)
                         .setMuteRoleId(result.getString("mute_role"))
                         .setLockdown(result.getBoolean("lockdown"))
-                        .setAutoQuote(result.getBoolean("auto_quote"));
+                        .setAutoQuote(result.getBoolean("auto_quote"))
+                        .setDmOnWarn(result.getBoolean("dm_on_warn"));
             else
                 this
                         .setGuildId(guildId);
@@ -57,22 +59,24 @@ public class GuildSettings {
                 if (this.getGuildId() == null) return this;
 
                 PreparedStatement newGuildSettings = connection
-                        .prepareStatement("INSERT INTO guild_settings (guild_id, mute_role, lockdown, auto_quote) VALUES (?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO guild_settings (guild_id, mute_role, lockdown, auto_quote, dm_on_warn) VALUES (?, ?, ?, ?, ?)");
 
                 newGuildSettings.setString(1, this.getGuildId());
                 newGuildSettings.setString(2, this.getMuteRoleId());
                 newGuildSettings.setBoolean(3, this.isLockdown());
                 newGuildSettings.setBoolean(4, this.isAutoQuote());
+                newGuildSettings.setBoolean(5, this.isDmOnWarn());
                 newGuildSettings.executeUpdate();
             } else {
 
                 PreparedStatement editGuildSettings = connection
-                        .prepareStatement("UPDATE guild_settings set mute_role = ?, lockdown = ?, auto_quote = ? where guild_id = ?");
+                        .prepareStatement("UPDATE guild_settings set mute_role = ?, lockdown = ?, auto_quote = ?, dm_on_warn = ? where guild_id = ?");
 
                 editGuildSettings.setString(1, this.getMuteRoleId());
                 editGuildSettings.setBoolean(2, this.isLockdown());
                 editGuildSettings.setBoolean(3, this.isAutoQuote());
-                editGuildSettings.setString(4, this.getGuildId());
+                editGuildSettings.setBoolean(4, this.isDmOnWarn());
+                editGuildSettings.setString(5, this.getGuildId());
 
                 editGuildSettings.executeUpdate();
             }
@@ -103,6 +107,9 @@ public class GuildSettings {
         return autoQuote;
     }
 
+    public boolean isDmOnWarn() {
+        return dmOnWarn;
+    }
 
     public GuildSettings setGuildId(String guildId) {
         this.guildId = guildId;
@@ -121,6 +128,11 @@ public class GuildSettings {
 
     public GuildSettings setAutoQuote(boolean autoQuote) {
         this.autoQuote = autoQuote;
+        return this;
+    }
+
+    public GuildSettings setDmOnWarn(boolean dmOnWarn) {
+        this.dmOnWarn = dmOnWarn;
         return this;
     }
 }

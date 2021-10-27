@@ -73,7 +73,8 @@ public class SQLiteDataSource {
                     "guild_id VARCHAR(20) NOT NULL," +
                     "mute_role VARCHAR(20)," +
                     "lockdown BOOLEAN NOT NULL DEFAULT false," +
-                    "auto_quote BOOLEAN NOT NULL DEFAULT false" +
+                    "auto_quote BOOLEAN NOT NULL DEFAULT false," +
+                    "dm_on_warn BOOLEAN NOT NULL DEFAULT true" +
                     ");");
 
             LOGGER.info("Guild settings table initialised");
