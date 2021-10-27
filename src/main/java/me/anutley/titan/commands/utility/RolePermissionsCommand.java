@@ -171,6 +171,8 @@ public class RolePermissionsCommand {
         permissions.add("command.utility.invite");
         permissions.add("command.utility.ping");
         permissions.add("command.utility.reminder");
+        permissions.add("command.utility.tag.get");
+        permissions.add("command.utility.tag.list");
         permissions.add("command.utility.wiki");
 
         StringBuilder perms = new StringBuilder();
