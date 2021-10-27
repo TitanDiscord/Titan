@@ -55,6 +55,7 @@ public class SQLiteDataSource {
         createWarnsTable();
         createRemindersTable();
         createPermissionsTable();
+        createNotesTable();
     }
 
     public SQLiteDataSource() {
@@ -218,6 +219,24 @@ public class SQLiteDataSource {
                     ");");
 
             LOGGER.info("Permissions table initialised");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void createNotesTable() {
+        try (final Statement statement = getConnection().createStatement()) {
+
+            statement.execute("CREATE TABLE IF NOT EXISTS guild_notes (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "guild_id VARCHAR(20) NOT NULL," +
+                    "target_id VARCHAR(20) NOT NULL," +
+                    "author_id VARCHAR(20) NOT NULL," +
+                    "content VARCHAR(1024) NOT NULL," +
+                    "time_created VARCHAR(50) NOT NULL" +
+                    ");");
+
+            LOGGER.info("Notes table initialised");
         } catch (SQLException e) {
             e.printStackTrace();
         }

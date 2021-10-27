@@ -76,7 +76,7 @@ public class Warning {
                 this.setId(rs.getString(1));
             } else {
                 PreparedStatement editReminder = connection
-                        .prepareStatement("UPDATE warnings set guild_id = ? and user_id = ? and moderator_id = ? and content = ? and time_created = ? where id = ?");
+                        .prepareStatement("UPDATE warnings set guild_id = ?, user_id = ?, moderator_id = ?, content = ?, time_created = ? where id = ?");
 
                 editReminder.setString(1, this.getGuildId());
                 editReminder.setString(2, this.getUserId());

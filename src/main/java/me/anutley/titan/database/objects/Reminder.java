@@ -79,7 +79,7 @@ public class Reminder {
                 this.setId(rs.getString(1));
             } else {
                 PreparedStatement editReminder = connection
-                        .prepareStatement("UPDATE reminders set guild_id = ? and channel_id = ? and user_id = ? and content = ? and time_in_milliseconds = ? and time_created = ? where id = ?");
+                        .prepareStatement("UPDATE reminders set guild_id = ?, channel_id = ?, user_id = ?, content = ?, time_in_milliseconds = ?, time_created = ? where id = ?");
 
                 editReminder.setString(1, this.getGuildId());
                 editReminder.setString(2, this.getChannelId());
