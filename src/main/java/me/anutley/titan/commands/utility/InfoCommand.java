@@ -95,8 +95,11 @@ public class InfoCommand {
         EmbedBuilder builder = new EmbedBuilder();
 
         event.replyEmbeds(
-                builder.setAuthor(event.getJDA().getSelfUser().getAsTag() + "'s stats", null, event.getJDA().getSelfUser().getAvatarUrl())
+                builder.setAuthor(event.getJDA().getSelfUser().getAsTag() + "'s info", null, event.getJDA().getSelfUser().getAvatarUrl())
                         .setColor(EmbedColour.NEUTRAL.getColour())
+                        .setDescription("[Support Server](https://discord.gg/4ueXW4fwrR)" +
+                                "\n[Wiki](https://titan.anutley.me)" +
+                                "\n[Top.gg](https://top.gg/bot/853225073023909918)")
                         .addField("Amount of Guilds", String.valueOf(event.getJDA().getGuilds().size()), true)
                         .addField("Total Amount Of Member (from all guilds)", String.valueOf(amountOfMembersInTotalGuild(event)), true)
                         .addField("Ping", String.valueOf(event.getJDA().getGatewayPing()), true)
