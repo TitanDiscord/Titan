@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -21,6 +22,8 @@ public class SetNickCommand {
 
         Member member = event.getOption("member").getAsMember();
 
+        String oldName = member.getEffectiveName();
+
         if (!event.getGuild().getSelfMember().canInteract(member)) {
             event.replyEmbeds(HierarchyError.self(event).build()).queue();
             return;
@@ -34,16 +37,30 @@ public class SetNickCommand {
            member.modifyNickname(
                     event.getOption("nickname") != null ? event.getOption("nickname").getAsString() : null).queue();
 
+        ActionLogger logger = new ActionLogger(event.getGuild());
+
         if (event.getOption("nickname") != null) {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription(member.getUser().getAsMention() + "'s nickname has been changed to `" + event.getOption("nickname").getAsString() + "`!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
-        } else
+
+            logger.addAction("Nickname changed")
+                    .addTarget(member.getUser())
+                    .addModerator(event.getUser())
+                    .addOldValue(oldName)
+                    .addNewValue(event.getOption("nickname").getAsString());
+        } else {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription(member.getUser().getAsMention() + "'s nickname has been reset")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
+            logger.addAction("Nickname reset")
+                    .addTarget(member.getUser())
+                    .addModerator(event.getUser());
+        }
+
+        logger.log();
     }
 }

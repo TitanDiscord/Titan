@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.settings;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.PingProtectionSettings;
 import me.anutley.titan.database.objects.PingProtectionUserData;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -34,31 +35,59 @@ public class PingProtectionSettingsCommand {
     @Command(name = "settings.pingprotection.enable", description = "Enables ping protection for this guild", permission = "command.settings.pingprotection.enable")
     public static void enablePingProtection(SlashCommandEvent event) {
 
-        new PingProtectionSettings(event.getGuild().getId())
-                .setEnabled(true)
-                .save();
+        PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
+
+        if (pingProtectionSettings.isEnabled()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Ping protection is already enabled!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
 
         event.replyEmbeds(new EmbedBuilder()
                 .setColor(EmbedColour.YES.getColour())
                 .setDescription("Ping protection has been enabled!")
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Ping protection enabled")
+                .addModerator(event.getUser())
+                .log();
+
+        pingProtectionSettings.setEnabled(true).save();
     }
 
     @Command(name = "settings.pingprotection.disable", description = "Disables ping protection for this guild", permission = "command.settings.pingprotection.disable")
     public static void disablePingProtection(SlashCommandEvent event) {
 
-        new PingProtectionSettings(event.getGuild().getId())
-                .setEnabled(false)
-                .save();
+        PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
+
+        if (!pingProtectionSettings.isEnabled()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Ping protection is already disabled!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
 
         event.replyEmbeds(new EmbedBuilder()
                 .setColor(EmbedColour.YES.getColour())
                 .setDescription("Ping protection has been disabled!")
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Ping protection disabled")
+                .addModerator(event.getUser())
+                .log();
+
+        pingProtectionSettings.setEnabled(false).save();
     }
 
     @Command(name = "settings.pingprotection.threshold", description = "Modifies the threshold of illegal pings someone can make before an action of your choice is taken", permission = "command.settings.pingprotection.threshold")
     public static void modifyPingThreshold(SlashCommandEvent event) {
+
+        int oldVal = new PingProtectionSettings(event.getGuild().getId()).getThreshold();
 
         new PingProtectionSettings(event.getGuild().getId())
                 .setThreshold(Integer.parseInt(event.getOption("amount").getAsString()))
@@ -68,6 +97,13 @@ public class PingProtectionSettingsCommand {
                 .setDescription("The ping protection threshold has been set to " + event.getOption("amount").getAsString())
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Ping protection threshold modified")
+                .addModerator(event.getUser())
+                .addOldValue(String.valueOf(oldVal))
+                .addNewValue(event.getOption("amount").getAsString())
+                .log();
     }
 
     @Command(name = "settings.pingprotection.add", description = "Adds a role to the ping protection", permission = "command.settings.pingprotection.add")
@@ -75,6 +111,11 @@ public class PingProtectionSettingsCommand {
 
         PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
         ArrayList<String> pingProtectedRoles = new ArrayList<>();
+
+        ActionLogger logger = new ActionLogger(event.getGuild())
+                .addAction("Role added to ping protection")
+                .addModerator(event.getUser())
+                .addTarget(event.getOption("role").getAsRole());
 
         if (pingProtectionSettings.getRoles() != null) {
 
@@ -100,6 +141,8 @@ public class PingProtectionSettingsCommand {
 
             pingProtectedRoles = pingProtectedRolesAsArrayList;
 
+            logger.log();
+
         } else {
             pingProtectedRoles.add(event.getOption("role").getAsRole().getId());
 
@@ -108,6 +151,7 @@ public class PingProtectionSettingsCommand {
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
+            logger.log();
         }
         pingProtectionSettings.setRoles(pingProtectedRoles).save();
     }
@@ -140,6 +184,11 @@ public class PingProtectionSettingsCommand {
 
             pingProtectedRolesAsArrayList.remove(event.getOption("role").getAsRole().getId());
 
+            new ActionLogger(event.getGuild())
+                    .addAction("Role removed from ping protection")
+                    .addModerator(event.getUser())
+                    .addTarget(event.getOption("role").getAsRole())
+                    .log();
 
             pingProtectedRoles = pingProtectedRolesAsArrayList;
 
@@ -180,7 +229,7 @@ public class PingProtectionSettingsCommand {
         event.replyEmbeds(builder.build()).queue();
     }
 
-    @Command(name = "settings.pingprotection.reset", description = "Resets a members illegal ping count", permission = "command.settings.pingprotection.reset")
+    @Command(name = "settings.pingprotection.resetpings", description = "Resets a members illegal ping count", permission = "command.settings.pingprotection.resetpings")
     public static void resetIllegalPings(SlashCommandEvent event) {
 
         new PingProtectionUserData(event.getGuild().getId(), event.getOption("member").getAsUser().getId())
@@ -191,6 +240,12 @@ public class PingProtectionSettingsCommand {
                 .setDescription(event.getOption("member").getAsUser().getAsMention() + "'s pings have been reset!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Illegal ping count reset")
+                .addModerator(event.getUser())
+                .addTarget(event.getOption("member").getAsUser())
+                .log();
     }
 
     @Command(name = "settings.pingprotection.action", description = "Changes the action that Titan will take when someone surpasses the illegal ping threshold", permission = "command.settings.pingprotection.action")
@@ -206,7 +261,11 @@ public class PingProtectionSettingsCommand {
                     .build()).queue();
         } else {
 
-            new PingProtectionSettings(event.getGuild().getId())
+            PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
+
+            String oldVal = pingProtectionSettings.getAction();
+
+            pingProtectionSettings
                     .setAction(event.getOption("action").getAsString())
                     .save();
 
@@ -215,6 +274,12 @@ public class PingProtectionSettingsCommand {
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
+            new ActionLogger(event.getGuild())
+                    .addAction("Illegal ping count threshold action changed")
+                    .addModerator(event.getUser())
+                    .addOldValue(oldVal)
+                    .addNewValue(event.getOption("action").getAsString())
+                    .log();
         }
     }
 }

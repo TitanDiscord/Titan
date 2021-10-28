@@ -1,11 +1,14 @@
 package me.anutley.titan.commands.settings;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.WelcomeSettings;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
+import me.anutley.titan.util.embeds.errors.NotTextChannelEmbed;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -28,41 +31,86 @@ public class WelcomeSettingsCommand {
 
     @Command(name = "settings.welcome.enable", description = "Enables Titan welcoming new members", permission = "command.settings.welcome.enable")
     public static void enableWelcome(SlashCommandEvent event) {
-        new WelcomeSettings(event.getGuild().getId())
-                .setEnabled(true)
-                .save();
+        WelcomeSettings welcomeSettings = new WelcomeSettings(event.getGuild().getId());
+
+        if (welcomeSettings.isEnabled()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Welcome messages are already enabled")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+        }
+
+        welcomeSettings.setEnabled(true).save();
 
         event.replyEmbeds(new EmbedBuilder()
-                .setDescription("Welcome messages has been enabled!")
+                .setDescription("Welcome messages have been enabled!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Welcome messages enabled")
+                .addModerator(event.getUser())
+                .addOldValue(false)
+                .addNewValue(true)
+                .log();
     }
 
     @Command(name = "settings.welcome.disable", description = "Disables Titan welcoming new members", permission = "command.settings.welcome.disable")
-    public void disableWelcome(SlashCommandEvent event) {
-        new WelcomeSettings(event.getGuild().getId())
-                .setEnabled(false)
-                .save();
+    public static void disableWelcome(SlashCommandEvent event) {
+        WelcomeSettings welcomeSettings = new WelcomeSettings(event.getGuild().getId());
+
+        if (!welcomeSettings.isEnabled()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Welcome messages are already disabled")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+        }
+
+        welcomeSettings.setEnabled(true).save();
 
         event.replyEmbeds(new EmbedBuilder()
-                .setDescription("Welcome messages has been disabled!")
+                .setDescription("Welcome messages have been disabled!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Welcome messages disabled")
+                .addModerator(event.getUser())
+                .addOldValue(true)
+                .addNewValue(false)
+                .log();
     }
 
     @Command(name = "settings.welcome.channel", description = "Changes the channel Titan should send welcome messages to", permission = "command.settings.welcome.channel")
     public static void changeWelcomeChannel(SlashCommandEvent event) {
 
-        new WelcomeSettings(event.getGuild().getId())
-                .setChannelId(event.getOption("channel").getAsGuildChannel().getId())
-                .save();
+        if (!event.getOption("channel").getChannelType().equals(ChannelType.TEXT)) {
+            event.replyEmbeds(NotTextChannelEmbed.Embed().build()).queue();
+            return;
+        }
+
+        WelcomeSettings welcomeSettings = new WelcomeSettings(event.getGuild().getId());
+
+        String oldVal = welcomeSettings.getChannelId();
+
+        welcomeSettings.setChannelId(event.getOption("channel").getAsGuildChannel().getId()).save();
 
         EmbedBuilder builder = new EmbedBuilder();
-
         builder.setDescription("The welcome channel has been set to " + event.getOption("channel").getAsGuildChannel().getAsMention());
+
         builder.setColor(EmbedColour.YES.getColour());
 
         event.replyEmbeds(builder.build()).queue();
+
+        ActionLogger logger = new ActionLogger(event.getGuild())
+                .addAction("Welcome messages channel changed")
+                .addModerator(event.getUser());
+
+        if (oldVal != null)
+            logger.addOldValue(event.getJDA().getTextChannelById(oldVal).getAsMention())
+                    .addNewValue(event.getJDA().getTextChannelById(event.getOption("channel").getAsGuildChannel().getId()).getAsMention());
+
+        logger.log();
 
     }
 
@@ -80,16 +128,23 @@ public class WelcomeSettingsCommand {
                             "%guild_name% - The name of the guild\n" +
                             "End the message with `-showavatar`, to show add the users avatar to the join message").build()).queue();
         } else {
-            new WelcomeSettings(event.getGuild().getId())
-                    .setMessage(event.getOption("message").getAsString())
-                    .save();
+            WelcomeSettings welcomeSettings = new WelcomeSettings(event.getGuild().getId());
 
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setDescription("The welcome message has been set to " + event.getOption("message").getAsString());
+            String oldMessage = welcomeSettings.getMessage();
 
-            builder.setColor(EmbedColour.YES.getColour());
+            welcomeSettings.setMessage(event.getOption("message").getAsString()).save();
 
-            event.replyEmbeds(builder.build()).queue();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("The welcome message has been set to " + event.getOption("message").getAsString())
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
+
+            new ActionLogger(event.getGuild())
+                    .addAction("Welcome message changed")
+                    .addModerator(event.getUser())
+                    .addOldValue(oldMessage)
+                    .addNewValue(event.getOption("message").getAsString())
+                    .log();
 
         }
     }
@@ -120,13 +175,23 @@ public class WelcomeSettingsCommand {
             if (event.getOption("role").getAsRole().getId().equals(event.getGuild().getPublicRole().getId())) id = null;
             else id = event.getOption("role").getAsRole().getId();
 
-            new WelcomeSettings(event.getGuild().getId()).setRoleId(id).save();
+            WelcomeSettings welcomeSettings = new WelcomeSettings(event.getGuild().getId());
+
+            Role oldVal = welcomeSettings.getRole();
+
+            welcomeSettings.setRoleId(id).save();
 
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription("The guild's welcome role has been set to " + event.getOption("role").getAsRole().getAsMention() + "!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
+            new ActionLogger(event.getGuild())
+                    .addAction("Welcome role changed")
+                    .addModerator(event.getUser())
+                    .addOldValue(oldVal.getAsMention())
+                    .addNewValue(event.getOption("role").getAsRole().getAsMention())
+                    .log();
         }
     }
 }

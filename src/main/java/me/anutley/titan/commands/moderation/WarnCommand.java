@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.Warning;
 import me.anutley.titan.database.util.WarnUtil;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -62,6 +63,12 @@ public class WarnCommand {
                 .setDescription(event.getOption("user").getAsUser().getAsMention() + " has been warned for " + (trimmed ? reason + "(Trimmed to 1024 chars)" : reason))
                 .build()).queue();
 
+        new ActionLogger(event.getGuild())
+                .addAction("Member warned")
+                .addModerator(event.getUser())
+                .addTarget(event.getOption("user").getAsUser())
+                .addReason(reason)
+                .log();
     }
 
     @Command(name = "warn.list", description = "Lists all the warnings of a user", permission = "command.moderation.warn.list")
@@ -125,6 +132,12 @@ public class WarnCommand {
                     .build()).queue();
             WarnUtil.removeWarningById(id);
 
+            new ActionLogger(event.getGuild())
+                    .addAction("Warn revoked")
+                    .addModerator(event.getUser())
+                    .addTarget(event.getOption("user").getAsUser())
+                    .log();
+
         } else {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription("A warning with the id of `" + event.getOption("id").getAsString() + "` for " + user.getAsMention() + " could not be found!")
@@ -149,6 +162,12 @@ public class WarnCommand {
                     .build()).queue();
 
             WarnUtil.clearUsersWarnings(event.getGuild().getId(), user.getId());
+
+            new ActionLogger(event.getGuild())
+                    .addAction("Warns cleared")
+                    .addModerator(event.getUser())
+                    .addTarget(user)
+                    .log();
 
         } else {
             event.replyEmbeds(new EmbedBuilder()

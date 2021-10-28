@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.GuildSettings;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,27 +19,59 @@ public class LockdownCommand {
     @Command(name = "lockdown.enable", description = "Enables lockdown for the server", permission = "command.moderation.lockdown.enable")
     public static void enableLockdown(SlashCommandEvent event) {
 
-        new GuildSettings(event.getGuild().getId())
-                .setLockdown(true)
-                .save();
+        GuildSettings guildSettings = new GuildSettings(event.getGuild().getId());
+
+        if (guildSettings.isLockdown()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Lockdown is already enabled")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
 
         event.replyEmbeds(new EmbedBuilder()
                 .setDescription("Lockdown has been enabled! Anyone who tries to join while lockdown is enabled will be kicked")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        guildSettings.setLockdown(true)
+                .save();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Lockdown enabled")
+                .addModerator(event.getUser())
+                .addOldValue(false)
+                .addNewValue(true)
+                .log();
     }
 
     @Command(name = "lockdown.disable", description = "Disables lockdown for the server", permission = "command.moderation.lockdown.disable")
     public static void disableLockdown(SlashCommandEvent event) {
 
-        new GuildSettings(event.getGuild().getId())
-                .setLockdown(false)
-                .save();
+        GuildSettings guildSettings = new GuildSettings(event.getGuild().getId());
+
+        if (!guildSettings.isLockdown()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Lockdown is already disabled")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
 
         event.replyEmbeds(new EmbedBuilder()
                 .setDescription("Lockdown has been disabled! Lockdown has been disabled! Users can now join")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        guildSettings.setLockdown(false)
+                .save();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Lockdown disabled")
+                .addModerator(event.getUser())
+                .addOldValue(true)
+                .addNewValue(false)
+                .log();
     }
 
     @Command(name = "lockdown.status", description = "Shows whether lockdown is enabled or not", permission = "command.moderation.lockdown.status")

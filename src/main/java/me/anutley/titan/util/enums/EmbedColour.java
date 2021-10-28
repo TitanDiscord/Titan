@@ -6,7 +6,8 @@ public enum EmbedColour {
 
     NEUTRAL("#008aff"),
     YES("#2ECC71"),
-    NO("#FF0000");
+    NO("#FF0000"),
+    MODERATION_LOGGING("#94C0DB");
 
     public final String colour;
 

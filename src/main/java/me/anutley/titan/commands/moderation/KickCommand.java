@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -38,6 +39,13 @@ public class KickCommand {
                 .setDescription(member.getAsMention() + " has been kicked for `" + "[" + event.getUser().getAsTag() + "] " + event.getOption("reason").getAsString() + "`!");
 
         event.replyEmbeds(builder.build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Member kicked")
+                .addModerator(event.getUser())
+                .addTarget(member.getUser())
+                .addReason(event.getOption("reason").getAsString())
+                .log();
 
     }
 

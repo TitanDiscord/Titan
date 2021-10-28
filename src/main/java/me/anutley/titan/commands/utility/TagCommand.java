@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.EmbedTag;
 import me.anutley.titan.database.objects.TextTag;
 import me.anutley.titan.database.util.TagUtil;
@@ -88,6 +89,11 @@ public class TagCommand extends ListenerAdapter {
                     .save();
 
             event.replyEmbeds(TagUtil.getTagEmbedBuilder(tag).build()).queue();
+
+            new ActionLogger(event.getGuild())
+                    .addAction("Embed Tag Created")
+                    .addModerator(event.getUser())
+                    .addExtraInfo("Tag Trigger:", tag.getTrigger()).log();
         }
     }
 
@@ -124,8 +130,13 @@ public class TagCommand extends ListenerAdapter {
 
         } catch (NoTagFoundException e) {
             event.replyEmbeds(NoTagEmbed.Embed().build()).queue();
+            return;
         }
 
+        new ActionLogger(event.getGuild())
+                .addAction("Embed Tag Edited")
+                .addModerator(event.getUser())
+                .addExtraInfo("Tag Trigger:", trigger).log();
     }
 
     @Command(name = "tag.text.create", description = "Creates a text tag", permission = "command.utility.tag.text.create")
@@ -152,6 +163,11 @@ public class TagCommand extends ListenerAdapter {
                     .save();
 
             event.reply(tag.getContent()).queue();
+
+            new ActionLogger(event.getGuild())
+                    .addAction("Text Tag Created")
+                    .addModerator(event.getUser())
+                    .addExtraInfo("Tag Trigger:", tag.getTrigger()).log();
         }
     }
 
@@ -181,7 +197,13 @@ public class TagCommand extends ListenerAdapter {
 
         } catch (NoTagFoundException e) {
             event.replyEmbeds(NoTagEmbed.Embed().build()).queue();
+            return;
         }
+
+        new ActionLogger(event.getGuild())
+                .addAction("Text Tag Edited")
+                .addModerator(event.getUser())
+                .addExtraInfo("Tag Trigger:", trigger).log();
     }
 
     @Command(name = "tag.get", description = "Gets a tag", permission = "command.utility.tag.get")
@@ -215,6 +237,11 @@ public class TagCommand extends ListenerAdapter {
                 .setDescription("`" + trigger + "` has been deleted!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Tag Deleted")
+                .addModerator(event.getUser())
+                .addExtraInfo("Tag Trigger:", trigger).log();
     }
 
     @Command(name = "tag.clear", description = "Clears ALL of this guild's tags. This action is irreversible", permission = "command.utility.tag.clear")
@@ -239,6 +266,10 @@ public class TagCommand extends ListenerAdapter {
                     .setColor(EmbedColour.YES.getColour())
                     .build()).override(true).queue();
             TagUtil.deleteGuildsTags(event.getGuild().getId());
+
+            new ActionLogger(event.getGuild())
+                    .addAction("Guilds' Tags Cleared")
+                    .addModerator(event.getUser()).log();
 
         } else {
             event.getMessage().editMessageEmbeds(new EmbedBuilder().setDescription("This guild's tags have not been cleared!")

@@ -2,6 +2,7 @@ package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.Config;
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.RolePermissions;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -79,6 +80,13 @@ public class RolePermissionsCommand {
                 .build()).queue();
 
         rolePermissions.setPermissions(rolePermissionList).save();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Permission Added")
+                .addModerator(event.getUser())
+                .addTarget(role)
+                .addExtraInfo("Permission", "```\n " + perm + "```")
+                .log();
     }
 
     @Command(name = "permission.remove", description = "Removes a permission from a role", permission = "command.utility.permission.remove")
@@ -116,6 +124,13 @@ public class RolePermissionsCommand {
                     .build()).queue();
 
             rolePermissions.setPermissions(rolePermissionList).save();
+
+            new ActionLogger(event.getGuild())
+                    .addAction("Permission Removed")
+                    .addModerator(event.getUser())
+                    .addTarget(role)
+                    .addExtraInfo("Permission", "```\n " + perm + "```")
+                    .log();
         }
         if (rolePermissionList == null)
             event.replyEmbeds(new EmbedBuilder()
@@ -184,9 +199,16 @@ public class RolePermissionsCommand {
         rolePermissions.setPermissions(permissions).save();
 
         event.replyEmbeds(new EmbedBuilder()
-                .setDescription("The role " + role.getAsMention() + " has had their permissions reset and now have the following permissions \n" + perms)
+                .setDescription("The role " + role.getAsMention() + " has had their permissions reset and now have the following permissions \n```\n" + perms + "```")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Default Permissions Added")
+                .addModerator(event.getUser())
+                .addTarget(role)
+                .addExtraInfo("Permission", "```\n" + perms + "```")
+                .log();
 
     }
 

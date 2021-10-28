@@ -16,6 +16,7 @@ public class GuildSettings {
     private boolean lockdown;
     private boolean autoQuote;
     private boolean dmOnWarn;
+    private String botLogChannelId;
 
     public GuildSettings(String guildId) {
 
@@ -34,7 +35,8 @@ public class GuildSettings {
                         .setMuteRoleId(result.getString("mute_role"))
                         .setLockdown(result.getBoolean("lockdown"))
                         .setAutoQuote(result.getBoolean("auto_quote"))
-                        .setDmOnWarn(result.getBoolean("dm_on_warn"));
+                        .setDmOnWarn(result.getBoolean("dm_on_warn"))
+                        .setBotLogsChannel(result.getString("bot_logs_channel"));
             else
                 this
                         .setGuildId(guildId);
@@ -59,24 +61,26 @@ public class GuildSettings {
                 if (this.getGuildId() == null) return this;
 
                 PreparedStatement newGuildSettings = connection
-                        .prepareStatement("INSERT INTO guild_settings (guild_id, mute_role, lockdown, auto_quote, dm_on_warn) VALUES (?, ?, ?, ?, ?)");
+                        .prepareStatement("INSERT INTO guild_settings (guild_id, mute_role, lockdown, auto_quote, dm_on_warn, bot_logs_channel) VALUES (?, ?, ?, ?, ?, ?)");
 
                 newGuildSettings.setString(1, this.getGuildId());
                 newGuildSettings.setString(2, this.getMuteRoleId());
                 newGuildSettings.setBoolean(3, this.isLockdown());
                 newGuildSettings.setBoolean(4, this.isAutoQuote());
                 newGuildSettings.setBoolean(5, this.isDmOnWarn());
+                newGuildSettings.setString(6, this.getBotLogChannelId());
                 newGuildSettings.executeUpdate();
             } else {
 
                 PreparedStatement editGuildSettings = connection
-                        .prepareStatement("UPDATE guild_settings set mute_role = ?, lockdown = ?, auto_quote = ?, dm_on_warn = ? where guild_id = ?");
+                        .prepareStatement("UPDATE guild_settings set mute_role = ?, lockdown = ?, auto_quote = ?, dm_on_warn = ?, bot_logs_channel = ? where guild_id = ?");
 
                 editGuildSettings.setString(1, this.getMuteRoleId());
                 editGuildSettings.setBoolean(2, this.isLockdown());
                 editGuildSettings.setBoolean(3, this.isAutoQuote());
                 editGuildSettings.setBoolean(4, this.isDmOnWarn());
-                editGuildSettings.setString(5, this.getGuildId());
+                editGuildSettings.setString(5, this.getBotLogChannelId());
+                editGuildSettings.setString(6, this.getGuildId());
 
                 editGuildSettings.executeUpdate();
             }
@@ -111,6 +115,10 @@ public class GuildSettings {
         return dmOnWarn;
     }
 
+    public String getBotLogChannelId() {
+        return botLogChannelId;
+    }
+
     public GuildSettings setGuildId(String guildId) {
         this.guildId = guildId;
         return this;
@@ -133,6 +141,11 @@ public class GuildSettings {
 
     public GuildSettings setDmOnWarn(boolean dmOnWarn) {
         this.dmOnWarn = dmOnWarn;
+        return this;
+    }
+
+    public GuildSettings setBotLogsChannel(String botLogChannelId) {
+        this.botLogChannelId = botLogChannelId;
         return this;
     }
 }

@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.settings;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.LeaveSettings;
 import me.anutley.titan.util.embeds.errors.NotTextChannelEmbed;
 import me.anutley.titan.util.enums.EmbedColour;
@@ -25,29 +26,57 @@ public class LeaveSettingsCommand {
 
     @Command(name = "settings.leave.enable", description = "Enables Titan's leave messages", permission = "command.settings.leave.enable")
     public static void enableLeave(SlashCommandEvent event) {
-        new LeaveSettings(event.getGuild().getId())
-                .setEnabled(true)
-                .save();
+        LeaveSettings leaveSettings = new LeaveSettings(event.getGuild().getId());
+
+        if (leaveSettings.isEnabled()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Leave messages are already enabled")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+        }
+
+        leaveSettings.setEnabled(true).save();
 
         event.replyEmbeds(new EmbedBuilder()
-                .setDescription("Leave messages has been enabled!")
+                .setDescription("Leave messages have been enabled!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Leave messages enabled")
+                .addModerator(event.getUser())
+                .addOldValue(false)
+                .addNewValue(true)
+                .log();
     }
 
     @Command(name = "settings.leave.disable", description = "Disables Titan's leave messages", permission = "command.settings.leave.disable")
     public static void disableWelcome(SlashCommandEvent event) {
-        new LeaveSettings(event.getGuild().getId())
-                .setEnabled(false)
-                .save();
+        LeaveSettings leaveSettings = new LeaveSettings(event.getGuild().getId());
+
+        if (!leaveSettings.isEnabled()) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Leave messages are already disabled")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+        }
+
+        leaveSettings.setEnabled(true).save();
 
         event.replyEmbeds(new EmbedBuilder()
-                .setDescription("Leave messages has been disabled!")
+                .setDescription("Leave messages have been disabled!")
                 .setColor(EmbedColour.YES.getColour())
                 .build()).queue();
+
+        new ActionLogger(event.getGuild())
+                .addAction("Leave messages disabled")
+                .addModerator(event.getUser())
+                .addOldValue(true)
+                .addNewValue(false)
+                .log();
     }
 
-    @Command(name = "settings.welcome.channel", description = "Changes the channel Titan should send leave messages to", permission = "command.settings.leave.channel")
+    @Command(name = "settings.leave.channel", description = "Changes the channel Titan should send leave messages to", permission = "command.settings.leave.channel")
     public static void changeLeaveChannel(SlashCommandEvent event) {
 
         if (!event.getOption("channel").getChannelType().equals(ChannelType.TEXT)) {
@@ -55,7 +84,11 @@ public class LeaveSettingsCommand {
             return;
         }
 
-        new LeaveSettings(event.getGuild().getId()).setChannelId(event.getOption("channel").getAsGuildChannel().getId()).save();
+        LeaveSettings leaveSettings = new LeaveSettings(event.getGuild().getId());
+
+        String oldVal = leaveSettings.getChannelId();
+
+        leaveSettings.setChannelId(event.getOption("channel").getAsGuildChannel().getId()).save();
 
         EmbedBuilder builder = new EmbedBuilder();
         builder.setDescription("The leave channel has been set to " + event.getOption("channel").getAsGuildChannel().getAsMention());
@@ -64,6 +97,15 @@ public class LeaveSettingsCommand {
 
         event.replyEmbeds(builder.build()).queue();
 
+        ActionLogger logger = new ActionLogger(event.getGuild())
+                .addAction("Leave messages channel changed")
+                .addModerator(event.getUser());
+
+        if (oldVal != null)
+            logger.addOldValue(event.getJDA().getTextChannelById(oldVal).getAsMention())
+                    .addNewValue(event.getJDA().getTextChannelById(event.getOption("channel").getAsGuildChannel().getId()).getAsMention());
+
+        logger.log();
     }
 
     @Command(name = "settings.leave.message", description = "The message Titan should send when someone leaves (Send without option to get a list of placeholders)", permission = "command.settings.leave.channel")
@@ -81,14 +123,23 @@ public class LeaveSettingsCommand {
                             "End the message with `-showavatar`, to show add the users avatar to the join message").build()).queue();
         } else {
 
-            new LeaveSettings(event.getGuild().getId()).setMessage(event.getOption("message").getAsString()).save();
+            LeaveSettings leaveSettings = new LeaveSettings(event.getGuild().getId());
 
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setDescription("The leave message has been set to " + event.getOption("message").getAsString());
+            String oldMessage = leaveSettings.getMessage();
 
-            builder.setColor(EmbedColour.YES.getColour());
+            leaveSettings.setMessage(event.getOption("message").getAsString()).save();
 
-            event.replyEmbeds(builder.build()).queue();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("The leave message has been set to " + event.getOption("message").getAsString())
+                    .setColor(EmbedColour.YES.getColour())
+                    .build()).queue();
+
+            new ActionLogger(event.getGuild())
+                    .addAction("Leave message changed")
+                    .addModerator(event.getUser())
+                    .addOldValue(oldMessage)
+                    .addNewValue(event.getOption("message").getAsString())
+                    .log();
 
         }
     }

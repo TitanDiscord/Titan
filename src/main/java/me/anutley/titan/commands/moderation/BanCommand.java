@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.moderation;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.util.embeds.errors.HierarchyError;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -39,18 +40,29 @@ public class BanCommand {
             return;
         }
 
-        event.getGuild().ban(user.getAsUser(), messagesToDelete, "[" + event.getUser().getAsTag() + "] " + event.getOption("reason").getAsString()).queue();
+        String reason = event.getOption("reason").getAsString();
+
+        event.getGuild().ban(user.getAsUser(), messagesToDelete, "[" + event.getUser().getAsTag() + "] " + reason).queue();
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(EmbedColour.YES.getColour());
 
-        if (messagesToDelete != 0)
-            builder.setDescription(user.getAsMember().getAsMention() + " has been banned for `" + event.getOption("reason").getAsString() + "` and " + messagesToDelete + " of days of messages have been deleted!");
+        ActionLogger logger = new ActionLogger(event.getGuild())
+                .addAction("Member banned")
+                .addModerator(event.getUser())
+                .addTarget(user.getAsUser())
+                .addReason(reason);
+
+        if (messagesToDelete != 0) {
+            builder.setDescription(user.getAsMember().getAsMention() + " has been banned for `" + reason + "` and " + messagesToDelete + " days of messages have been deleted!");
+            logger.addExtraInfo("Days Of Messages Deleted", String.valueOf(messagesToDelete));
+        }
 
         else
-            builder.setDescription(user.getAsMember().getAsMention() + " has been banned for `" + event.getOption("reason").getAsString() + "`!");
+            builder.setDescription(user.getAsMember().getAsMention() + " has been banned for `" + reason + "`!");
 
         event.replyEmbeds(builder.build()).queue();
+        logger.log();
 
     }
 }

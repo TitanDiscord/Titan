@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.util.embeds.errors.NotTextChannelEmbed;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -51,6 +52,7 @@ public class AnnounceCommand {
                             .setThumbnail(thumbnail)
                             .setFooter(footer)
                             .build()).queue();
+
         } catch (InsufficientPermissionException e) {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription("I do not have permission to send a message in " + channel.getAsMention() + "!")
@@ -61,5 +63,9 @@ public class AnnounceCommand {
 
         event.replyEmbeds(new EmbedBuilder().setDescription("Announced!").setColor(EmbedColour.YES.getColour()).build()).setEphemeral(true).queue();
 
+        new ActionLogger(event.getGuild())
+                .addAction("New Announcement")
+                .addModerator(event.getUser())
+                .addChannel(channel).log();
     }
 }
