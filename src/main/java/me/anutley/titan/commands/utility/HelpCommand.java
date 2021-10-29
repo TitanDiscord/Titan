@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class HelpCommand {
                 new EmbedBuilder()
                         .setTitle("Command Name: `" + commandOption + "`")
                         .setColor(EmbedColour.NEUTRAL.getColour())
+                        .addField("Category:", StringUtils.capitalize(commands.get(commandOption).permission().split("\\.")[1]), false)
                         .addField("Description:", commands.get(commandOption).description(), false)
                         .addField("Permission:", commands.get(commandOption).permission(), false)
                         .addField("Has Permission:",
@@ -54,7 +56,7 @@ public class HelpCommand {
                         .build()).queue();
     }
 
-    @Command(name = "help.category", description = "PProvides you with more information about a category", permission = "command.utility.help.category")
+    @Command(name = "help.category", description = "Provides you with more information about a category", permission = "command.utility.help.category")
     public static void categoryHelpCommand(SlashCommandEvent event) {
         String category = event.getOption("category").getAsString().toLowerCase(Locale.ROOT);
 
