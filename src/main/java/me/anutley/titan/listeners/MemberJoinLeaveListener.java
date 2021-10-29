@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-public class JoinLeaveListener extends ListenerAdapter {
+public class MemberJoinLeaveListener extends ListenerAdapter {
 
     String userid;
 

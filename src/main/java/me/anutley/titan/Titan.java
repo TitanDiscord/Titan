@@ -83,9 +83,10 @@ public class Titan {
 
                         //Events
                         new CommandListener(),
+                        new GuildJoinLeaveListener(),
                         new IllegalPingListener(),
-                        new JoinLeaveListener(),
                         new LockdownListener(),
+                        new MemberJoinLeaveListener(),
                         new MentionListener(),
                         new QuoteListener(),
                         new ReadyListener(),
