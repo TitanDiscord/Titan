@@ -90,6 +90,7 @@ public class Titan {
                         new MentionListener(),
                         new QuoteListener(),
                         new ReadyListener(),
+                        new StatisticsListener(),
                         new TagListener()
                 ).build();
 
