@@ -3,8 +3,11 @@ package me.anutley.titan.commands.dev;
 import me.anutley.titan.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.jodah.expiringmap.ExpiringMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +33,14 @@ public class EvalCommand extends DevBaseCommand {
                 || !event.getMessage().getContentRaw().contains("eval")
                 || !previousEvals.containsKey(event.getMessageId())) return;
         eval(event.getMessage());
+    }
+
+    @Override
+    public void onGuildMessageDelete(@NotNull GuildMessageDeleteEvent event) {
+        if (previousEvals.containsKey(event.getMessageId())) {
+            event.getChannel().deleteMessageById(previousEvals.get(event.getMessageId())).queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+            previousEvals.remove(event.getMessageId());
+        }
     }
 
     public void eval(Message message) {
