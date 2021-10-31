@@ -1,6 +1,7 @@
 package me.anutley.titan.commands.dev;
 
 import me.anutley.titan.Config;
+import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageDeleteEvent;
@@ -11,10 +12,14 @@ import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.jodah.expiringmap.ExpiringMap;
 import org.jetbrains.annotations.NotNull;
 
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.awt.*;
+import javax.script.ScriptException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class EvalCommand extends DevBaseCommand {
 
@@ -47,29 +52,37 @@ public class EvalCommand extends DevBaseCommand {
 
         String code = message.getContentRaw().split("eval")[1];
 
-
         ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("js");
-        scriptEngine.put("message", message);
-        scriptEngine.put("author", message.getAuthor());
-        scriptEngine.put("channel", message.getChannel());
-        scriptEngine.put("guild", message.getGuild());
-        scriptEngine.put("jda", message.getJDA());
+
+        String script = "with (_javaImports) {\n" + code + "\n}";
+
+        Bindings bindings = scriptEngine.createBindings();
+        importBindings(scriptEngine, bindings);
+
+        bindings.put("message", message);
+        bindings.put("author", message.getAuthor());
+        bindings.put("member", message.getMember());
+        bindings.put("channel", message.getChannel());
+        bindings.put("guild", message.getGuild());
+        bindings.put("jda", message.getJDA());
 
         EmbedBuilder builder = new EmbedBuilder();
         try {
             long time = System.currentTimeMillis();
-            String output = scriptEngine.eval(code).toString();
+            String output = scriptEngine.eval(script, bindings).toString();
+
             time = System.currentTimeMillis() - time;
+
             builder.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getAvatarUrl());
-            builder.setColor(Color.GREEN);
-            builder.addField("Evaluated Code", "```\n" + output + "\n```", false);
+            builder.setColor(EmbedColour.YES.getColour());
+            builder.addField("Evaluated Code", "```java\n" + output + "\n```", false);
             builder.addField("Time Taken To Evaluate", time + "ms", true);
 
         } catch (Exception e) {
             builder.setAuthor(message.getAuthor().getName(), null, message.getAuthor().getAvatarUrl());
-            builder.setColor(Color.RED);
+            builder.setColor(EmbedColour.NO.getColour());
             builder.addField("Error", "```\n" + e.getMessage() + "\n```", false);
-            builder.addField("Your Code", "```\n" + code + "\n```", false);
+            builder.addField("Your Code", "```java\n" + code + "\n```", false);
 
         }
 
@@ -78,6 +91,27 @@ public class EvalCommand extends DevBaseCommand {
             message.getTextChannel().editMessageEmbedsById(existingMessageId, builder.build()).queue();
         } else {
             message.getTextChannel().sendMessageEmbeds(builder.build()).queue(newMessage -> previousEvals.put(message.getId(), newMessage.getId()));
+        }
+    }
+
+    private static void importBindings(ScriptEngine scriptEngine, Bindings bindings) {
+        List<String> imports = Arrays.asList(
+                "me.anutley.titan",
+                "me.anutley.titan.util",
+                "me.anutley.titan.database",
+                "net.dv8tion.jda.api",
+                "net.dv8tion.jda.api.entities",
+                "net.dv8tion.jda.api.utils",
+                "net.dv8tion.jda.internal.utils",
+                "java.lang",
+                "java.util");
+        try {
+            scriptEngine.eval("var _javaImports = new JavaImporter(" +
+                    imports.stream().map(i -> i.startsWith("java") ? i : "Packages." + i).collect(Collectors.joining(","))
+                    + ");", bindings);
+
+        } catch (ScriptException e) {
+            e.printStackTrace();
         }
     }
 
