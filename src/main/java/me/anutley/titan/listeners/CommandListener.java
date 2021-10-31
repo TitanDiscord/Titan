@@ -7,6 +7,7 @@ import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -24,6 +25,14 @@ public class CommandListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommand(SlashCommandEvent event) {
+
+        if (event.getChannel().getType().equals(ChannelType.PRIVATE)) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Titan can only be used in a guild!")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
 
         String commandName = event.getName();
 
