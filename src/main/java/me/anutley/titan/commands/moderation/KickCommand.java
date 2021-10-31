@@ -34,9 +34,11 @@ public class KickCommand {
         }
 
 
+        event.getMember().kick("[" + event.getUser().getAsTag() + "]" + event.getOption("reason").getAsString()).queue();
+
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(EmbedColour.YES.getColour())
-                .setDescription(member.getAsMention() + " has been kicked for `" + "[" + event.getUser().getAsTag() + "] " + event.getOption("reason").getAsString() + "`!");
+                .setDescription(member.getAsMention() + " has been kicked for `" + event.getOption("reason").getAsString() + "`!");
 
         event.replyEmbeds(builder.build()).queue();
 
