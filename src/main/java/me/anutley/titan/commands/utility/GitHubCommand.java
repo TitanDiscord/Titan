@@ -16,7 +16,7 @@ import okhttp3.Request;
 import java.io.IOException;
 import java.util.Objects;
 
-public class GitHubCommand  {
+public class GitHubCommand {
     public static CommandData GitHubCommandData = new CommandData("github", "Gets information about a GitHub user/repo")
             .addSubcommands(new SubcommandData("repository", "Gets information about a GitHub repo")
                     .addOption(OptionType.STRING, "repo", "The owner and name of the repo seperated by a slash (EG ANutley/Titan)", true))
@@ -64,8 +64,12 @@ public class GitHubCommand  {
             event.replyEmbeds(builder.build()).queue();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Please make sure you are entering a valid URL")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
         }
+
 
     }
 
@@ -105,7 +109,10 @@ public class GitHubCommand  {
             event.replyEmbeds(builder.build()).queue();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Please make sure you are entering a valid URL")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
         }
     }
 
@@ -150,7 +157,10 @@ public class GitHubCommand  {
             event.replyEmbeds(builder.build()).queue();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("Please make sure you are entering a valid URL")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
         }
     }
 

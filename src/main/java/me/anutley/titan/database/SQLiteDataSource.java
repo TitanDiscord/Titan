@@ -199,7 +199,7 @@ public class SQLiteDataSource {
                     "guild_id VARCHAR(20) NOT NULL," +
                     "channel_id VARCHAR(20) NOT NULL," +
                     "user_id VARCHAR(20) NOT NULL," +
-                    "content VARCHAR(4000) NOT NULL," +
+                    "content VARCHAR(2000) NOT NULL," +
                     "time_in_milliseconds VARCHAR(50) NOT NULL," +
                     "time_created VARCHAR(50) NOT NULL" +
                     ");");

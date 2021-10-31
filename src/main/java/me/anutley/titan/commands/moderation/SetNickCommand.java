@@ -23,6 +23,15 @@ public class SetNickCommand {
         Member member = event.getOption("member").getAsMember();
 
         String oldName = member.getEffectiveName();
+        String newName = event.getOption("nickname").getAsString();
+
+        if (newName.length() > 32) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("A nickname can be a maximum of 32 characters")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
 
         if (!event.getGuild().getSelfMember().canInteract(member)) {
             event.replyEmbeds(HierarchyError.self(event).build()).queue();
@@ -35,13 +44,13 @@ public class SetNickCommand {
         }
 
            member.modifyNickname(
-                    event.getOption("nickname") != null ? event.getOption("nickname").getAsString() : null).queue();
+                    event.getOption("nickname") != null ? newName : null).queue();
 
         ActionLogger logger = new ActionLogger(event.getGuild());
 
         if (event.getOption("nickname") != null) {
             event.replyEmbeds(new EmbedBuilder()
-                    .setDescription(member.getUser().getAsMention() + "'s nickname has been changed to `" + event.getOption("nickname").getAsString() + "`!")
+                    .setDescription(member.getUser().getAsMention() + "'s nickname has been changed to `" + newName + "`!")
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
@@ -49,7 +58,7 @@ public class SetNickCommand {
                     .addTarget(member.getUser())
                     .addModerator(event.getUser())
                     .addOldValue(oldName)
-                    .addNewValue(event.getOption("nickname").getAsString());
+                    .addNewValue(newName);
         } else {
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription(member.getUser().getAsMention() + "'s nickname has been reset")

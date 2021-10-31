@@ -50,7 +50,7 @@ public class SlowmodeCommand {
             if (seconds != 0) formattedTime += seconds + "s";
 
             if (channel == null) event.getTextChannel().getManager().setSlowmode((int) total).queue();
-            else event.getGuild().getTextChannelById(channel.getId()).getManager().setSlowmode((int) total).queue();
+            else channel.getManager().setSlowmode((int) total).queue();
             
             ActionLogger logger = new ActionLogger(event.getGuild());
 

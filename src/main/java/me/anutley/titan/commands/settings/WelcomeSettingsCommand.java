@@ -132,10 +132,20 @@ public class WelcomeSettingsCommand {
 
             String oldMessage = welcomeSettings.getMessage();
 
-            welcomeSettings.setMessage(event.getOption("message").getAsString()).save();
+            String newMessage = event.getOption("message").getAsString();
+
+            if (newMessage.length() > 500) {
+                event.replyEmbeds(new EmbedBuilder()
+                        .setDescription("The maximum length of the message can be 500 characters")
+                        .setColor(EmbedColour.NO.getColour())
+                        .build()).setEphemeral(true).queue();
+                return;
+            }
+
+            welcomeSettings.setMessage(newMessage).save();
 
             event.replyEmbeds(new EmbedBuilder()
-                    .setDescription("The welcome message has been set to " + event.getOption("message").getAsString())
+                    .setDescription("The welcome message has been set to " + newMessage)
                     .setColor(EmbedColour.YES.getColour())
                     .build()).queue();
 
@@ -143,7 +153,7 @@ public class WelcomeSettingsCommand {
                     .addAction("Welcome message changed")
                     .addModerator(event.getUser())
                     .addOldValue(oldMessage)
-                    .addNewValue(event.getOption("message").getAsString())
+                    .addNewValue(newMessage)
                     .log();
 
         }

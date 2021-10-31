@@ -24,13 +24,15 @@ public class BanCommand {
 
         OptionMapping user = event.getOption("user");
         OptionMapping messages = event.getOption("messages");
+        String reason = event.getOption("reason").getAsString();
         int messagesToDelete = 0;
 
         if (messages != null) messagesToDelete = (int) messages.getAsLong();
         if (messagesToDelete > 7) messagesToDelete = 7;
+        if (reason.length() > 470) reason = reason.substring(0, 470);
 
 
-        if (!event.getGuild().getSelfMember().canInteract(event.getOption("user").getAsMember())) {
+        if (!event.getGuild().getSelfMember().canInteract(user.getAsMember())) {
             event.replyEmbeds(HierarchyError.self(event).build()).queue();
             return;
         }
@@ -40,7 +42,6 @@ public class BanCommand {
             return;
         }
 
-        String reason = event.getOption("reason").getAsString();
 
         event.getGuild().ban(user.getAsUser(), messagesToDelete, "[" + event.getUser().getAsTag() + "] " + reason).queue();
 

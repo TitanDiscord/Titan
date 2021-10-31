@@ -22,8 +22,10 @@ public class KickCommand {
     public static void kickCommand(SlashCommandEvent event) {
 
         Member member = event.getOption("user").getAsMember();
+        String reason = event.getOption("reason").getAsString();
+        if (reason.length() > 470) reason = reason.substring(0, 470);
 
-        if (!event.getGuild().getSelfMember().canInteract(event.getOption("user").getAsMember())) {
+        if (!event.getGuild().getSelfMember().canInteract(member)) {
             event.replyEmbeds(HierarchyError.self(event).build()).queue();
             return;
         }
@@ -34,11 +36,11 @@ public class KickCommand {
         }
 
 
-        event.getMember().kick("[" + event.getUser().getAsTag() + "]" + event.getOption("reason").getAsString()).queue();
+       member.kick("[" + event.getUser().getAsTag() + "]" + reason).queue();
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setColor(EmbedColour.YES.getColour())
-                .setDescription(member.getAsMention() + " has been kicked for `" + event.getOption("reason").getAsString() + "`!");
+                .setDescription(member.getAsMention() + " has been kicked for `" + reason + "`!");
 
         event.replyEmbeds(builder.build()).queue();
 
@@ -46,7 +48,7 @@ public class KickCommand {
                 .addAction("Member kicked")
                 .addModerator(event.getUser())
                 .addTarget(member.getUser())
-                .addReason(event.getOption("reason").getAsString())
+                .addReason(reason)
                 .log();
 
     }

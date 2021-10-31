@@ -43,6 +43,16 @@ public class RemindCommand {
             return;
         }
 
+        String content = event.getOption("content").getAsString();
+
+        if (content.length() > 2000) {
+            event.replyEmbeds(new EmbedBuilder()
+                    .setDescription("The content of the reminder can be a maximum of 2000 characters")
+                    .setColor(EmbedColour.NO.getColour())
+                    .build()).setEphemeral(true).queue();
+            return;
+        }
+
         long minutes = event.getOption("minutes") != null ? event.getOption("minutes").getAsLong() : 0;
         long hours = event.getOption("hours") != null ? event.getOption("hours").getAsLong() : 0;
         long days = event.getOption("days") != null ? event.getOption("days").getAsLong() : 0;
@@ -56,7 +66,7 @@ public class RemindCommand {
                 .setGuildId(event.getGuild().getId())
                 .setChannelId(event.getChannel().getId())
                 .setUserId(event.getUser().getId())
-                .setContent(event.getOption("content").getAsString())
+                .setContent(content)
                 .setTimeInMilliseconds(totalTimeInMs)
                 .setTimeCreated(System.currentTimeMillis())
                 .save();

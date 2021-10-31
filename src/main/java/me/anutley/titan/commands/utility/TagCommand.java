@@ -115,6 +115,8 @@ public class TagCommand extends ListenerAdapter {
             String colour = event.getOption("colour") != null ? event.getOption("colour").getAsString() : null;
             String thumbnail = event.getOption("thumbnail") != null ? event.getOption("thumbnail").getAsString() : null;
 
+            if (!checkArgs(event, title, description, colour, thumbnail)) return;
+
             if (title != null)
                 if (!title.equals(tag.getTitle())) tag.setTitle(title);
             if (description != null)
@@ -151,7 +153,7 @@ public class TagCommand extends ListenerAdapter {
                     .build()).setEphemeral(true).queue();
         } else {
 
-            EmbedBuilder builder = checkLength(event.getOption("content").getAsString(), 2000, "content");
+            EmbedBuilder builder = checkLength(event.getOption("content").getAsString(), 2048, "content");
 
             if (builder != null) {
                 event.replyEmbeds(builder.build()).queue();
@@ -182,7 +184,7 @@ public class TagCommand extends ListenerAdapter {
                 return;
             }
 
-            EmbedBuilder builder = checkLength(event.getOption("content").getAsString(), 2000, "content");
+            EmbedBuilder builder = checkLength(event.getOption("content").getAsString(), 2048, "content");
 
             if (builder != null) {
                 event.replyEmbeds(builder.build()).queue();
@@ -344,9 +346,9 @@ public class TagCommand extends ListenerAdapter {
         }
 
         if (description != null) {
-            EmbedBuilder titleLengthEmbed = checkLength(description, 4096, "description");
-            if (titleLengthEmbed != null) {
-                event.replyEmbeds(titleLengthEmbed.build()).setEphemeral(true).queue();
+            EmbedBuilder descriptionLengthEmbed = checkLength(description, 4096, "description");
+            if (descriptionLengthEmbed != null) {
+                event.replyEmbeds(descriptionLengthEmbed.build()).setEphemeral(true).queue();
                 return false;
             }
         }
