@@ -36,12 +36,12 @@ Some of the features Titan has are:
 * Instructions on how to use these features can be found [here](https://titan.anutley.me/setup/)
 * More detailed information can be found on our [wiki](https://titan.anutley.me)
 
+---
+
 <table>
 <thead>
   <tr>
     <td align="center" width="75%">
-
----
       
 # A message of thanks for...
       
