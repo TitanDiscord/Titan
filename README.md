@@ -35,3 +35,20 @@ Some of the features Titan has are:
 * Customisable welcome / leave messages   (`/settings welcome/leave ...`)
 * Instructions on how to use these features can be found [here](https://titan.anutley.me/setup/)
 * More detailed information can be found on our [wiki](https://titan.anutley.me)
+
+<table>
+<thead>
+  <tr>
+    <td align="center" width="75%">
+
+# A message of thanks for...
+      
+[JetBrains](https://jb.gg/OpenSource) for supplying me with a free open source license for Titan
+    </td>
+    <td align="center" width="25%">
+      <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png"></img>
+    </td>
+  </tr>
+</thead>
+</table>
+
