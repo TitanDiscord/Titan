@@ -41,6 +41,8 @@ Some of the features Titan has are:
   <tr>
     <td align="center" width="75%">
 
+---
+      
 # A message of thanks for...
       
 [JetBrains](https://jb.gg/OpenSource) for supplying me with a free open source license for Titan
