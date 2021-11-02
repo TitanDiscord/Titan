@@ -157,7 +157,7 @@ public class NoteCommand {
 
         if (pageNumber == 0)
             event.replyEmbeds(new EmbedBuilder()
-                    .setDescription(user.getAsMention() + " have no notes!")
+                    .setDescription(user.getAsMention() + " has no notes!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
     }
