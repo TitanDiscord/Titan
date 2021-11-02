@@ -91,6 +91,7 @@ public class Titan {
                         new QuoteListener(),
                         new ReadyListener(),
                         new StatisticsListener(),
+                        new TagCommand(), //This is used for buttons clicks
                         new TagListener()
                 ).build();
 

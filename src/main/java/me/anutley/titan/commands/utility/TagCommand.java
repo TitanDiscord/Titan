@@ -254,6 +254,7 @@ public class TagCommand extends ListenerAdapter {
                         Button.success("clear_all_tags=true", "Yes"),
                         Button.danger("clear_all_tags=false", "No"))
                 .queue();
+        System.out.println("test");
     }
 
 
@@ -263,10 +264,12 @@ public class TagCommand extends ListenerAdapter {
         if (!PermissionUtil.hasPermission("command.utility.tag.clear", event.getMember())) return;
 
         if (event.getComponentId().equals("clear_all_tags=true")) {
+
             event.getMessage().editMessageEmbeds(new EmbedBuilder()
                     .setDescription("This guild's tags have been cleared!")
                     .setColor(EmbedColour.YES.getColour())
-                    .build()).override(true).queue();
+                    .build()).setActionRows().override(true).queue();
+
             TagUtil.deleteGuildsTags(event.getGuild().getId());
 
             new ActionLogger(event.getGuild())
@@ -274,9 +277,11 @@ public class TagCommand extends ListenerAdapter {
                     .addModerator(event.getUser()).log();
 
         } else {
+
             event.getMessage().editMessageEmbeds(new EmbedBuilder().setDescription("This guild's tags have not been cleared!")
                     .setColor(EmbedColour.NO.getColour())
-                    .build()).override(true).queue();
+                    .build()).setActionRows().override(true).queue();
+
         }
     }
 
