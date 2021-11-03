@@ -276,7 +276,7 @@ public class TagCommand extends ListenerAdapter {
                     .addAction("Guilds' Tags Cleared")
                     .addModerator(event.getUser()).log();
 
-        } else {
+        } if (event.getComponentId().equals("clear_all_tags=false")) {
 
             event.getMessage().editMessageEmbeds(new EmbedBuilder().setDescription("This guild's tags have not been cleared!")
                     .setColor(EmbedColour.NO.getColour())
