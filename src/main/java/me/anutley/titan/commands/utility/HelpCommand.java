@@ -21,9 +21,9 @@ public class HelpCommand {
 
     public static CommandData HelpCommandData = new CommandData("help", "Provides you with information about a command or command category")
             .addSubcommands(new SubcommandData("command", "Provides you with more information about a command")
-                    .addOption(OptionType.STRING, "command", "The command (format: category.command), for example: fun.avatar, moderation.ban or tag.embed.create "))
+                    .addOption(OptionType.STRING, "command", "The command (format: category.command), for example: fun.avatar, moderation.ban or tag.embed.create", true))
             .addSubcommands(new SubcommandData("category", "Provides you with more information about a category")
-                    .addOption(OptionType.STRING, "category", "The category you want to find more information about"))
+                    .addOption(OptionType.STRING, "category", "The category you want to find more information about", true))
             .addSubcommands(new SubcommandData("all", "Provides you with more information about all Titan's commands"));
 
     @Command(name = "help.command", description = "Provides you with more information about a command", permission = "command.utility.help.command")
