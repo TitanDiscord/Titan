@@ -20,7 +20,7 @@ public class MentionListener extends ListenerAdapter {
                         new EmbedBuilder()
                                 .setTitle("Hi! 👋")
                                 .setColor(EmbedColour.NEUTRAL.getColour())
-                                .setDescription("All Titan's Command are Slash Commands" +
+                                .setDescription("All Titan's commands are Slash Commands (/help)" +
                                         "\n[GitHub Page](https://github.com/ANutley/Titan/)" +
                                         "\n[Documentation](https://titan.anutley.me/)" +
                                         "\n[Invite Me](https://discord.com/api/oauth2/authorize?client_id=853225073023909918&permissions=8&scope=bot%20applications.commands)" +
