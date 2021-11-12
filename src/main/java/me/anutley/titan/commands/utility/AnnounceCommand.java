@@ -39,8 +39,10 @@ public class AnnounceCommand {
         String thumbnail = event.getOption("thumbnail") != null ? event.getOption("thumbnail").getAsString() : null;
         String footer = event.getOption("footer") != null ? event.getOption("footer").getAsString() : null;
 
-        if (content.length() > 4096) content = content.substring(0, 4096);
-        if (footer.length() > 1024) footer = footer.substring(0, 1024);
+        if (content != null)
+            if (content.length() > 4096) content = content.substring(0, 4096);
+        if (footer != null)
+            if (footer.length() > 1024) footer = footer.substring(0, 1024);
         if (colour != null)
             if (!colour.startsWith("#")) colour = "#" + colour;
 
