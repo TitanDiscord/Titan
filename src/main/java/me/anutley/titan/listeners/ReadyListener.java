@@ -20,7 +20,7 @@ public class ReadyListener extends ListenerAdapter {
 
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
                 () -> ForkJoinPool.commonPool().execute(
-                        () -> event.getJDA().getPresence().setActivity(Activity.watching("over " + event.getJDA().getGuilds().size() + " guilds!"))
+                        () -> event.getJDA().getPresence().setActivity(Activity.watching("over " + event.getJDA().getGuilds().size() + " guilds! | /help"))
                 ), 0, 1, TimeUnit.HOURS);
 
         logger.info(event.getJDA().getSelfUser().getAsTag() + " is ready in " + event.getJDA().getGuilds().size() + " guilds!");
