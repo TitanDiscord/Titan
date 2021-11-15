@@ -6,12 +6,12 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class DiceCommand {
+public class DieCommand {
 
-    public static CommandData DiceCommandData = new CommandData("dice", "Rolls a die");
+    public static CommandData DieCommandData = new CommandData("die", "Rolls a die");
 
-    @Command(name = "dice", description = "Rolls a dice", permission = "command.fun.dice")
-    public static void diceCommand(SlashCommandEvent event) {
+    @Command(name = "die", description = "Rolls a die", permission = "command.fun.die")
+    public static void dieCommand(SlashCommandEvent event) {
         int num = ThreadLocalRandom.current().nextInt(1, 7);
 
         if (num == 1) event.reply("1️⃣").queue();
