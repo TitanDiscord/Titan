@@ -10,7 +10,7 @@ public class DiceCommand {
 
     public static CommandData DiceCommandData = new CommandData("dice", "Rolls a die");
 
-    @Command(name = "dice", description = "Rolls a dice", permission = "command.fun.dice")
+    @Command(name = "dice", description = "Rolls a die", permission = "command.fun.die")
     public static void diceCommand(SlashCommandEvent event) {
         int num = ThreadLocalRandom.current().nextInt(1, 7);
 
