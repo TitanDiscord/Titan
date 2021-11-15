@@ -28,7 +28,7 @@ Titan is a multipurpose Discord bot written in Java using [JDA](https://github.c
 Some of the features Titan has are:
 
 * Moderation commands   (`/ban, /kick, /slowmode...`)
-* Fun commands  (`/avatar, /die...`)
+* Fun commands  (`/avatar, /dice...`)
 * Utility commands  (`/remind, /tag, /note, /github...`)
 * Protection against pings for designated roles   (`/settings pingprotection ... `)
 * Lockdowns if the server is being raided   (`/lockdown ... `)
