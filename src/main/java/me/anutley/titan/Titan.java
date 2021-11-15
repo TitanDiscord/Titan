@@ -106,7 +106,7 @@ public class Titan {
                         // Fun Commands
                         AvatarCommand.AvatarCommandData,
                         CoinCommand.CoinCommandData,
-                        DiceCommand.DieCommandData,
+                        DiceCommand.DiceCommandData,
 
                         // Moderation Commands
                         BanCommand.BanCommandData,

@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class DiceCommand {
 
-    public static CommandData DieCommandData = new CommandData("dice", "Rolls a die");
+    public static CommandData DiceCommandData = new CommandData("dice", "Rolls a die");
 
     @Command(name = "dice", description = "Rolls a die", permission = "command.fun.die")
     public static void diceCommand(SlashCommandEvent event) {
