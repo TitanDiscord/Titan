@@ -6,7 +6,7 @@ import me.anutley.titan.commands.dev.ShutdownCommand;
 import me.anutley.titan.commands.dev.UpdateCommand;
 import me.anutley.titan.commands.fun.AvatarCommand;
 import me.anutley.titan.commands.fun.CoinCommand;
-import me.anutley.titan.commands.fun.DiceCommand;
+import me.anutley.titan.commands.fun.DieCommand;
 import me.anutley.titan.commands.moderation.*;
 import me.anutley.titan.commands.settings.SettingsBaseCommand;
 import me.anutley.titan.commands.utility.*;
@@ -106,7 +106,7 @@ public class Titan {
                         // Fun Commands
                         AvatarCommand.AvatarCommandData,
                         CoinCommand.CoinCommandData,
-                        DiceCommand.DiceCommandData,
+                        DieCommand.DieCommandData,
 
                         // Moderation Commands
                         BanCommand.BanCommandData,
