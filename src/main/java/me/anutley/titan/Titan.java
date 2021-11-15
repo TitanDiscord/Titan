@@ -41,7 +41,7 @@ public class Titan {
                 //Fun Commands
                 AvatarCommand.class,
                 CoinCommand.class,
-                DiceCommand.class,
+                DieCommand.class,
 
                 //Moderation Commands
                 BanCommand.class,
