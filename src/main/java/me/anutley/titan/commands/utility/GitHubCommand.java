@@ -140,7 +140,7 @@ public class GitHubCommand {
                     mostPopularRepo = orgRepos.get(i);
                 }
             }
-            JsonNode member = requestGitHub("https://api.github.com/orgs/" + event.getOption("org").getAsString() + "/members");
+            JsonNode member = requestGitHub("https://api.github.com/orgs/" + event.getOption("org").getAsString() + "/public_members");
 
             EmbedBuilder builder = new EmbedBuilder()
                     .setTitle(repo.get("login").asText(), repo.get("html_url").asText())
