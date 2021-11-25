@@ -13,6 +13,7 @@ import me.anutley.titan.commands.utility.*;
 import me.anutley.titan.database.ReminderInitialiser;
 import me.anutley.titan.database.SQLiteDataSource;
 import me.anutley.titan.listeners.*;
+import me.scarsz.jdaappender.ChannelLoggingHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -35,7 +36,6 @@ public class Titan {
         startupTime = System.currentTimeMillis();
 
         Config config = new Config();
-        new SQLiteDataSource();
 
         registerCommands(
                 //Fun Commands
@@ -134,6 +134,15 @@ public class Titan {
                 )
                 .queue();
         ReminderInitialiser.run();
+
+        new ChannelLoggingHandler(() -> jda.getTextChannelById(Config.instance.get("BOT_LOGGING_CHANNEL")), c -> {
+            c.mapLoggerName("net.dv8tion.jda", "JDA");
+            c.mapLoggerName("me.anutley.titan", "Titan");
+            c.setColored(true);
+        }).attach().schedule();
+
+        new SQLiteDataSource();
+
     }
 
     public static ArrayList<Class<?>> registerCommands(Class<?>... command) {

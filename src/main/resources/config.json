@@ -3,5 +3,6 @@
   "GITHUB_TOKEN": "enter token",
   "BOT_OWNER": "bot owner id",
   "GUILD_LOG_CHANNEL": "channel id",
-  "STATISTICS_CHANNEL": "channel id"
+  "STATISTICS_CHANNEL": "channel id",
+  "BOT_LOGGING_CHANNEL": "channel id"
 }
