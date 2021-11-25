@@ -43,7 +43,7 @@ public class StatisticsListener extends ListenerAdapter {
     }
 
     public Category getCategory() {
-        return Titan.getJda().getCategoryById(Config.getInstance().get("STATISTICS_CHANNEL"));
+        return Titan.getJda().getCategoryById(Config.getInstance().get("STATISTICS_CATEGORY"));
     }
 
     public VoiceChannel getOrCreateChannel(String name) {
