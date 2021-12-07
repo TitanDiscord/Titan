@@ -205,7 +205,7 @@ public class GitHubCommand {
                 else
                     builder.setColor(0x238636).addField("State", "Open", true);
 
-                if (issue.get("closed_by") != null)
+                if (!issue.get("closed_by").asText().equals("null"))
                     builder.addField("Closed By", issue.get("closed_by").get("login").asText(), true);
             }
 
