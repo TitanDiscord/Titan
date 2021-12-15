@@ -121,7 +121,8 @@ public class InfoCommand {
         event.replyEmbeds(new EmbedBuilder()
                 .setAuthor(memberTag, null, member.getUser().getAvatarUrl())
                 .setTitle("User Info")
-                .setThumbnail(member.getUser().getAvatarUrl())
+                .setThumbnail(member.getAvatarUrl())
+                .setImage(member.getUser().retrieveProfile().complete().getBannerUrl())
                 .setColor(member.getColor())
                 .addField("ID", member.getId(), true)
                 .addField("Nickname", member.getEffectiveName(), true)
@@ -166,7 +167,6 @@ public class InfoCommand {
                 .addField("Roles", String.valueOf(guild.getRoles().size()), true)
                 .addField("Emotes", String.valueOf(guild.getEmotes().size()), true)
                 .addField("Verification Level", guild.getVerificationLevel().toString(), true)
-                .addField("Created", TimeFormat.RELATIVE.format(guild.getTimeCreated()), true)
                 .addField("Categories", String.valueOf(guild.getCategories().size()), true)
                 .addField("Channels",
                         "Text Channels: " + guild.getTextChannels().size() +
