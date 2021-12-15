@@ -16,14 +16,14 @@ repositories {
 
 dependencies {
     // Java
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     // JDA
-    implementation 'net.dv8tion:JDA:4.3.0_333'
+    implementation 'net.dv8tion:JDA:4.4.0_351'
 
     // Logging
-    implementation 'ch.qos.logback:logback-classic:1.2.7'
+    implementation 'ch.qos.logback:logback-classic:1.2.8'
     implementation 'me.scarsz:jdaappender:1.0-SNAPSHOT' //Used for Discord logging
 
     // JDBC / SQLite
