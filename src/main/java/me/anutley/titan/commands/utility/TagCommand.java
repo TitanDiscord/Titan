@@ -254,7 +254,6 @@ public class TagCommand extends ListenerAdapter {
                         Button.success("clear_all_tags=true", "Yes"),
                         Button.danger("clear_all_tags=false", "No"))
                 .queue();
-        System.out.println("test");
     }
 
 
