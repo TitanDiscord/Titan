@@ -54,6 +54,7 @@ public class QuoteListener extends ListenerAdapter {
         if (!message.getMentionedUsers().contains(message.getJDA().getSelfUser())) return;
 
         String[] args = message.getContentRaw().split(" ");
+        if (args.length < 2) return;
         Matcher matcher = MESSAGE_URL_REGEX.matcher(args[1]);
 
         if (!matcher.matches()) return;

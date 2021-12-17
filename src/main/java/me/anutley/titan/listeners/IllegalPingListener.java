@@ -25,10 +25,12 @@ public class IllegalPingListener extends ListenerAdapter {
         if (!(event.getMessage().getMentionedMembers().size() > 0)) return;
 
         PingProtectionSettings pingProtectionSettings = new PingProtectionSettings(event.getGuild().getId());
-        PingProtectionUserData pingProtectionUserData = new PingProtectionUserData(event.getGuild().getId(), event.getMember().getId());
 
         if (!pingProtectionSettings.isEnabled()) return;
-        if (event.getMember().getUser().isBot()) return;
+        if (event.getAuthor().isBot()) return;
+        if (event.getMember() == null) return;
+
+        PingProtectionUserData pingProtectionUserData = new PingProtectionUserData(event.getGuild().getId(), event.getMember().getId());
 
         ping = pingProtectionUserData.getCount();
         threshold = pingProtectionSettings.getThreshold();
