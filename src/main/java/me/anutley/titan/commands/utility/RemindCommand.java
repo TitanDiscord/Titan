@@ -3,6 +3,7 @@ package me.anutley.titan.commands.utility;
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.Reminder;
 import me.anutley.titan.database.util.ReminderUtil;
+import me.anutley.titan.util.Paginator;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -84,12 +85,13 @@ public class RemindCommand {
         int count = reminders.size();
         int tagCount = 0;
         int pageNumber = 0;
+        int itemsPerPage = 15;
 
         StringBuilder content = new StringBuilder();
         content.append("ID - Time Until Reminder \n");
+        Paginator paginator = new Paginator(event.getInteraction().getId(), event.getUser().getId());
 
-
-        for (int i = 0; i < count; i += 15) {
+        for (int i = 0; i < count; i += itemsPerPage) {
 
             pageNumber++;
 
@@ -97,7 +99,7 @@ public class RemindCommand {
             builder.setTitle("Page " + pageNumber)
                     .setColor(EmbedColour.NEUTRAL.getColour());
 
-            for (int j = 0; j < 15; j++) {
+            for (int j = 0; j < itemsPerPage; j++) {
                 if (tagCount >= count) break;
                 content.append("`" + reminders.get(tagCount).getId() + "` - " + TimeFormat.DATE_TIME_LONG.format(reminders.get(tagCount).getTimeInMilliseconds()) + "\n");
                 tagCount++;
@@ -105,10 +107,7 @@ public class RemindCommand {
 
             builder.setDescription(content.toString());
 
-            if (pageNumber == 1)
-                event.replyEmbeds(builder.build()).queue();
-            else
-                event.getChannel().sendMessageEmbeds(builder.build()).queue();
+            paginator.addPage(builder.build());
 
             content.setLength(0);
         }
@@ -117,6 +116,10 @@ public class RemindCommand {
                     .setDescription("You have no reminders!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
+        else
+            event.reply(paginator.getCurrent())
+                    .addActionRows(paginator.getButtons())
+                    .queue();
     }
 
     @Command(name = "remind.info", description = "Give info about a specific reminder", permission = "command.utility.remind.info")

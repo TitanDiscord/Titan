@@ -3,6 +3,8 @@ package me.anutley.titan.commands.utility;
 import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.objects.Note;
 import me.anutley.titan.database.util.NoteUtil;
+import me.anutley.titan.listeners.PaginatorListener;
+import me.anutley.titan.util.Paginator;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
@@ -128,16 +130,20 @@ public class NoteCommand {
         int count = notes.size();
         int noteCount = 0;
         int pageNumber = 0;
+        int itemsPerPage = 10;
 
-        for (int i = 0; i < count; i += 25) {
+        Paginator paginator = new Paginator(event.getInteraction().getId(), event.getUser().getId());
+        PaginatorListener.addPaginator(paginator);
+
+        for (int i = 0; i < count; i += itemsPerPage) {
 
             pageNumber++;
 
             EmbedBuilder builder = new EmbedBuilder()
                     .setColor(EmbedColour.NEUTRAL.getColour())
-                    .setFooter("Page Number " + pageNumber);
+                    .setFooter("Page " + pageNumber);
 
-            for (int j = 0; j < 25; j++) {
+            for (int j = 0; j < itemsPerPage; j++) {
                 if (noteCount >= count) break;
 
                 builder.addField("`" + notes.get(noteCount).getId() + "` added by "
@@ -148,18 +154,21 @@ public class NoteCommand {
                 noteCount++;
             }
 
-            if (pageNumber == 1)
-                event.replyEmbeds(builder.setTitle(user.getAsTag() + "'s notes")
-                        .build()).queue();
-            else
-                event.getChannel().sendMessageEmbeds(builder.build()).queue();
+            paginator.addPage(builder.build());
+
         }
+
 
         if (pageNumber == 0)
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription(user.getAsMention() + " has no notes!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
+        else
+            event.reply(paginator.getCurrent())
+                    .addActionRows(paginator.getButtons())
+                    .queue();
+
     }
 
 }

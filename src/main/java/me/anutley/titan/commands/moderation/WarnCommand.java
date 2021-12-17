@@ -4,6 +4,8 @@ import me.anutley.titan.commands.Command;
 import me.anutley.titan.database.ActionLogger;
 import me.anutley.titan.database.objects.Warning;
 import me.anutley.titan.database.util.WarnUtil;
+import me.anutley.titan.listeners.PaginatorListener;
+import me.anutley.titan.util.Paginator;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
@@ -79,9 +81,11 @@ public class WarnCommand {
         int count = warnings.size();
         int warningCount = 0;
         int pageNumber = 0;
+        int itemsPerPage = 10;
 
-
-        for (int i = 0; i < count; i += 25) {
+        Paginator paginator = new Paginator(event.getInteraction().getId(), event.getUser().getId());
+        PaginatorListener.addPaginator(paginator);
+        for (int i = 0; i < count; i += itemsPerPage) {
 
             pageNumber++;
 
@@ -90,7 +94,7 @@ public class WarnCommand {
                     .setColor(EmbedColour.NEUTRAL.getColour())
                     .setFooter("Page " + pageNumber);
 
-            for (int j = 0; j < 25; j++) {
+            for (int j = 0; j < itemsPerPage; j++) {
                 if (warningCount >= count) break;
 
                 Warning warning = warnings.get(warningCount);
@@ -99,19 +103,22 @@ public class WarnCommand {
                 builder.addField(warning.getId() + " - by " + moderator.getAsTag() + " - " + TimeFormat.DATE_TIME_LONG.format(warning.getTimeCreated()), warning.getContent(), false);
                 warningCount++;
             }
+            paginator.addPage(builder.build());
 
             if (pageNumber == 1)
-                event.replyEmbeds(builder.setDescription("**ID - Moderator** \nReason")
-                        .build()).queue();
-            else
-                event.getChannel().sendMessageEmbeds(builder.build()).queue();
-
+                builder.setDescription("**ID - Moderator** \nReason");
         }
+
         if (pageNumber == 0)
             event.replyEmbeds(new EmbedBuilder()
                     .setDescription(user.getAsMention() + " has no warnings!")
                     .setColor(EmbedColour.NO.getColour())
                     .build()).queue();
+
+        else
+            event.reply(paginator.getCurrent())
+                    .addActionRows(paginator.getButtons())
+                    .queue();
 
     }
 

@@ -1,7 +1,9 @@
 package me.anutley.titan.commands.utility;
 
 import me.anutley.titan.commands.Command;
+import me.anutley.titan.listeners.PaginatorListener;
 import me.anutley.titan.util.CommandUtil;
+import me.anutley.titan.util.Paginator;
 import me.anutley.titan.util.PermissionUtil;
 import me.anutley.titan.util.enums.EmbedColour;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -72,17 +74,23 @@ public class HelpCommand {
         int count = commands.size();
         int commandCount = 0;
         int pageNumber = 0;
+        int itemsPerPage = 10;
 
-        for (int i = 0; i < count; i += 25) {
+        Paginator paginator = new Paginator(event.getInteraction().getId(), event.getUser().getId());
+        PaginatorListener.addPaginator(paginator);
+
+        for (int i = 0; i < count; i += itemsPerPage) {
 
             pageNumber++;
-            EmbedBuilder builder = new EmbedBuilder();
+            EmbedBuilder builder = new EmbedBuilder()
+                    .setColor(EmbedColour.NEUTRAL.getColour())
+                    .setFooter("Page " + pageNumber);
 
             if (pageNumber == 1)
                 builder.setTitle(WordUtils.capitalize(category) + " Commands")
                         .setDescription("To find out more about a specific command run `/help command <command>`");
 
-            for (int j = 0; j < 25; j++) {
+            for (int j = 0; j < itemsPerPage; j++) {
                 if (commandCount >= count) break;
 
                 Command command = commands.get(commandCount);
@@ -91,16 +99,13 @@ public class HelpCommand {
                 commandCount++;
             }
 
-            if (pageNumber == 1)
-                event.replyEmbeds(builder
-                        .setColor(EmbedColour.NEUTRAL.getColour())
-                        .build()).queue();
-            else
-                event.getChannel().sendMessageEmbeds(builder
-                        .setColor(EmbedColour.NEUTRAL.getColour())
-                        .build()).queue();
-
+            paginator.addPage(builder.build());
         }
+
+        event
+                .reply(paginator.getCurrent())
+                .addActionRows(paginator.getButtons())
+                .queue();
     }
 
     @Command(name = "help.all", description = "Provides you with more information about all Titan's commands", permission = "command.utility.help.all")

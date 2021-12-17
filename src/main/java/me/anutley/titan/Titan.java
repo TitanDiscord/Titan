@@ -92,7 +92,8 @@ public class Titan {
                         new ReadyListener(),
                         new StatisticsListener(),
                         new TagCommand(), //This is used for buttons clicks
-                        new TagListener()
+                        new TagListener(),
+                        new PaginatorListener()
                 ).build();
 
 
