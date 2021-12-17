@@ -79,11 +79,14 @@ public class WarnUtil {
     public static Warning warnUser(Warning warn) {
 
         if (new GuildSettings(warn.getGuildId()).isDmOnWarn())
-            Titan.getJda().getUserById(warn.getUserId()).openPrivateChannel().complete()
-                    .sendMessageEmbeds(new EmbedBuilder()
-                            .setDescription("You have been warned in " + Titan.getJda().getGuildById(warn.getGuildId()).getName() + " for `" + warn.getContent() + "`")
-                            .setColor(EmbedColour.NEUTRAL.getColour())
-                            .build()).queue(null, new ErrorHandler().ignore(ErrorResponse.CANNOT_SEND_TO_USER));
+            if (!warn.getUserId().equals(Titan.getJda().getSelfUser().getId()))
+                Titan.getJda().getUserById(warn.getUserId()).openPrivateChannel().queue(
+                        c -> c.sendMessageEmbeds(new EmbedBuilder()
+                                .setDescription("You have been warned in " + Titan.getJda().getGuildById(warn.getGuildId()).getName() + " for `" + warn.getContent() + "`")
+                                .setColor(EmbedColour.NEUTRAL.getColour())
+                                .build()).queue()
+                        , new ErrorHandler().ignore(ErrorResponse.CANNOT_SEND_TO_USER));
+
         return warn;
     }
 }
