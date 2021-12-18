@@ -23,7 +23,7 @@ dependencies {
     implementation 'net.dv8tion:JDA:4.4.0_351'
 
     // Logging
-    implementation 'ch.qos.logback:logback-classic:1.2.8'
+    implementation 'ch.qos.logback:logback-classic:1.2.9'
     implementation 'me.scarsz:jdaappender:1.0-SNAPSHOT' //Used for Discord logging
 
     // JDBC / SQLite
