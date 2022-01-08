@@ -70,7 +70,7 @@ public class MemberJoinLeaveListener extends ListenerAdapter {
             }
 
             event.getGuild().getTextChannelById(leaveSettings.getChannelId()).sendMessageEmbeds(builder
-                    .setColor(EmbedColour.YES.getColour())
+                    .setColor(EmbedColour.NO.getColour())
                     .setDescription(message.trim()).build()).queue();
     }
 
