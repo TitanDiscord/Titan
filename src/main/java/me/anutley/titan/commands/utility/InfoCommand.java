@@ -146,7 +146,7 @@ public class InfoCommand {
                                 "\n[Wiki](https://titan.anutley.me)" +
                                 "\n[Top.gg](https://top.gg/bot/853225073023909918)")
                         .addField("Amount of Guilds", String.valueOf(event.getJDA().getGuilds().size()), true)
-                        .addField("Total Amount Of Member (from all guilds)", String.valueOf(amountOfMembersInTotalGuild(event)), true)
+                        .addField("Total Amount Of Members (from all guilds)", String.valueOf(amountOfMembersInTotalGuild(event)), true)
                         .addField("Ping", String.valueOf(event.getJDA().getGatewayPing()), true)
                         .addField("Uptime", TimeFormat.RELATIVE.format(Titan.getStartupTime()), true)
 
